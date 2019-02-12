@@ -134,8 +134,197 @@ void Graph::print() {
     }
 }
 
+list<int> trouver_permutation(int *order, int n, int index) {
+    list<int> ret;
+    for (int i = 0; i < n; i++) {
+        ret.push_back(order[(i + index) % n]);
+    }
+    return ret;
+}
+
+void permut_tab(int **tab, int nb_permut, int n) {
+    int swap = 0;
+    //0, 1, 2
+    //swap = 1
+    //1, 0, 2
+    //1,0,2 - 2,1,0 - 0,2,1
+    //swap = 0
+    //1, 2, 0  
+        //cout << "index[" << i % n << "] = "<< (*tab)[i %n] <<", index + 1["<< (i + 1) % n << "] " << (*tab)[(i + 1) % n]  << endl;
+
+    cout << "nb: " << nb_permut << endl;
+    for (int i = 0; i < n; i++) {
+        cout << (*tab)[i] << " ";
+    }
+    cout << endl;
+    for (int i = 0; i < nb_permut; i++) {
+        swap = (*tab)[i % n];
+        (*tab)[i] = (*tab)[(i + 1) % n];
+        (*tab)[(i + 1) % n] = swap;
+    }
+}
+int factorial(int input) {
+    if (input <= 0)
+        return 0;
+    int res = 1;    
+    while (input > 1) {
+        res *= input;
+        input -= 1;
+    }
+    return res;
+}
+
+int *create_tab(int n) {
+    int *tab = new int[n];
+    for (int i = 0; i < n; i++) {
+        tab[i] = i;
+    }
+    return tab;
+}
+
+void swap(int *x, int *y) 
+{ 
+    int temp; 
+    temp = *x; 
+    *x = *y; 
+    *y = temp; 
+} 
+  
+void permute(list<list<int>> *ret, int *tab, int l, int n) 
+{ 
+   int i; 
+   if (l == n) {
+       list<int> tmp;
+       for (int index = 0; index <= n; index++) {
+           tmp.push_back(tab[index]);
+       }
+       ret->push_back(tmp);
+   }
+     
+   else
+   { 
+       for (i = l; i <= n; i++) 
+       { 
+          swap((tab + l), (tab + i)); 
+          permute(ret, tab, l + 1, n); 
+          swap((tab + l), (tab + i));
+       } 
+   } 
+} 
+
+list<list<int>> generate_permutations(int n) {
+    list<list<int>> ret;
+    int *tab = create_tab(n);
+    permute(&ret, tab, 0, n - 1);
+    return ret;
+}
+   /* 
+    [ 0 1 2 3 ]
+    [ 1 2 3 0 ]
+    [ 2 3 0 1 ]
+    [ 3 0 1 2 ]
+
+    [ 1 0 2 3 ]
+    [ 0 2 3 1 ]
+    [ 2 3 1 0 ]
+    [ 3 1 0 2 ]
+
+    [ 0 2 1 3 ]
+    [ 2 1 3 0 ]
+    [ 1 3 0 2 ]
+    [ 3 0 2 1 ]
+
+    [ 2 3 0 1 ]
+    [ 3 0 1 2 ]
+    [ 0 1 2 3 ]
+    [ 1 2 3 0 ]
+
+
+    [ 2 1 3 0 ]
+    [ 1 3 0 2 ]
+    [ 3 0 2 1 ]
+    [ 0 2 1 3 ]
+
+    [ 1 2 3 0 ]
+    [ 2 3 0 1 ]
+    [ 3 0 1 2 ]
+    [ 0 1 2 3 ]
+-----
+    0 1 2 3 > swap 1 - 2
+    0 2 1 3 > swap 1 - 3, retour au debut
+    0 2 3 1 > swap 2 - 3
+    0 3 2 1 > swap 2 - 1, retour au debut
+    0 3 1 2 > swap 3 - 1
+    0 1 3 2 > swap 3 - 2, retour au debut, facto6 donc stop
+
+    1 0 2 3 > swap 0 - 2
+    1 2 0 3 > swap 0 - 3, retour au debut
+    1 2 3 0 > swap 2 - 3
+    1 3 2 0 > swap 2 - 0, retour au debut
+    1 3 0 2 > swap 3 - 0
+    1 0 3 2 > swap 3 - 2, retour au debut, facto6 donc stop
+
+    0 1 2 > swap 1 - 2
+    0 2 1 > retour au debut
+    1 0 2 > swap 0 - 2
+    1 2 0 > retour au debut
+    2 1 0 > swap 1 - 0
+    2 0 1 > retour au debut
+
+
+    0 1 2 3 4 > swap 1 - 2
+    0 2 1 3 4 > swap 1 - 3
+    0 2 3 1 4 > swap 1 - 4, retour au debut
+    0 2 3 4 1 > swap 2 - 3
+
+    0 3 2 4 1 > swap 2 - 4
+    0 3 4 2 1 > swap 2 - 1, retour au debut
+    0 3 4 1 2 > swap 3 - 4
+
+    0 4 3 1 2 > swap 3 - 1
+    0 4 1 3 2 > swap 3 - 2, retour au debut
+    0 4 1 2 3 > swap 4 - 1
+
+    0 1 4 2 3 > swap 4 - 2
+    0 1 2 4 3 > swap 4 - 3, retour au début
+
+
+    (23)
+
+-----
+    0 1 2 3
+    0 1 3 2
+    0 2 1 3
+    0 2 3 1
+    0 3 1 2
+    0 3 2 1
+
+    1 0 2 3
+    1 0 3 2
+    1 2 0 3
+    1 2 3 0
+    1 3 0 2
+    1 3 2 0
+    2 0 1 3
+    2 0 3 1
+    2 1 0 3
+    2 1 3 0
+    2 3 0 1
+    2 3 1 0
+    3 0 1 2
+    3 0 2 1
+    3 1 2 0
+    3 1 0 2
+    3 2 0 1
+    3 2 1 0*/
+
 int main(void){
-    std::ofstream file ("../resources/test.txt");
+    list<list<int>> tmp = generate_permutations(40);
+    for_each(tmp.begin(), tmp.end(), [](list<int> l){
+        for_each(l.begin(), l.end(), [](int a){cout << a << " ";});
+        cout << endl;
+    });
+    /*std::ofstream file ("../resources/test.txt");
     srand (time(NULL));
     Graph g(5);
     cout << "starting pvc" << endl;
@@ -146,6 +335,6 @@ int main(void){
     Graph g2(input);
     cout << "created" << endl;
     g2.print();
-    input.close();
+    input.close();*/
     return (0);
 }
