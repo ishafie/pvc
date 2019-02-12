@@ -216,8 +216,53 @@ list<list<int>> generate_permutations(int n) {
     list<list<int>> ret;
     int *tab = create_tab(n);
     permute(&ret, tab, 0, n - 1);
+    delete tab;
     return ret;
 }
+
+list<list<int>> generate_one_permutations(int n, int depart) {
+    list<list<int>> ret;
+    int *tab = create_tab(n);
+    tab[depart] = 0;
+    tab[0] = depart;
+    permute(&ret, tab, 1, n - 1);
+    delete tab;
+    return ret;
+}
+
+/*list<int> distances_boucles(list<list<int>> lb, int **tab) {
+
+}*/
+
+list<list<int>> genere_boucle(int n, int depart) {
+    return generate_one_permutations(n, depart);
+}
+
+
+int main(void){
+    list<list<int>> tmp = generate_one_permutations(3, 1);
+    for_each(tmp.begin(), tmp.end(), [](list<int> l){
+        for_each(l.begin(), l.end(), [](int a){cout << a << " ";});
+        cout << endl;
+    });
+    /*std::ofstream file ("../resources/test.txt");
+    srand (time(NULL));
+    Graph g(5);
+    cout << "starting pvc" << endl;
+    g.print();
+    g.generateRandomGraph(file, 10);
+    file.close();
+    std::ifstream input("../resources/test.txt");
+    Graph g2(input);
+    cout << "created" << endl;
+    g2.print();
+    input.close();*/
+    return (0);
+}
+
+
+
+
    /* 
     [ 0 1 2 3 ]
     [ 1 2 3 0 ]
@@ -317,24 +362,3 @@ list<list<int>> generate_permutations(int n) {
     3 1 0 2
     3 2 0 1
     3 2 1 0*/
-
-int main(void){
-    list<list<int>> tmp = generate_permutations(40);
-    for_each(tmp.begin(), tmp.end(), [](list<int> l){
-        for_each(l.begin(), l.end(), [](int a){cout << a << " ";});
-        cout << endl;
-    });
-    /*std::ofstream file ("../resources/test.txt");
-    srand (time(NULL));
-    Graph g(5);
-    cout << "starting pvc" << endl;
-    g.print();
-    g.generateRandomGraph(file, 10);
-    file.close();
-    std::ifstream input("../resources/test.txt");
-    Graph g2(input);
-    cout << "created" << endl;
-    g2.print();
-    input.close();*/
-    return (0);
-}
