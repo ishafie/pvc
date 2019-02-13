@@ -5,34 +5,25 @@
 #include <string>
 #include <fstream>
 
+#include "Algo.h"
+#include "Graph.h"
+
 using namespace std;
 
-class Graph {
-    private:
-    int **tab;
-    int summits = 0;
-
-
-    public:
-    Graph(int summits);
-    Graph(ifstream &i);
-    ~Graph();
-    void print();
-    auto generateRandomWeight(int max);
-    void generateRandomGraph(ostream &o, int max);
-    int getIntUpToDelimiter(string line, char delimiter);
-    int **createTab(int summits);
-
-};
-
-int **Graph::createTab(int summits) {
-    int **tabtmp = new int*[summits];
+std::vector<std::vector<int> > Graph::createTab(int summits) {
+    std::vector<std::vector<int> > tabtmp(summits, std::vector<int>(summits,0));
+    /*
+    for (std::vector<int> row : tabtmp)
+        row = std::vector<int>(summits,0);
+        */
+    /*
     for (int i = 0; i < summits;i++) {
         tabtmp[i] = new int[summits];
         for (int i2 = 0; i2 < summits; i2++) {
             tabtmp[i][i2] = 0;
         }
     }
+    */
     return tabtmp;
 }
 
@@ -41,7 +32,7 @@ Graph::Graph(int summits) {
     this->tab = createTab(summits);
 }
 
-Graph::Graph(ifstream &i) {
+Graph::Graph(std::ifstream &i) {
     string line;
     cout << "reading file" << endl;
     getIntUpToDelimiter("", ' '); // to reset static int to 0
@@ -75,7 +66,7 @@ Graph::Graph(ifstream &i) {
                 exit(0);
             }
             getIntUpToDelimiter("", ' '); // to reset static
-            this->tab[node][node2] = weight;
+            this->tab.at(node).at(node2) = weight;
             cout << "node1: " << node << " node2: " << node2 << " weight: " << weight << endl;
         }
     }
@@ -117,7 +108,7 @@ auto Graph::generateRandomWeight(int max) {
     return (ret);
 }
 
-void Graph::generateRandomGraph(ostream &o, int max) {
+void Graph::generateRandomGraph(std::ostream &o, int max) {
     list<int> weights = generateRandomWeight(max);
     o << max << endl;
     for (int weight : weights) {
@@ -126,13 +117,32 @@ void Graph::generateRandomGraph(ostream &o, int max) {
 }
 
 void Graph::print() {
+    
     for (int i = 0; i < this->summits; i++) {
         for (int i2 = 0; i2 < this->summits; i2++) {
-            cout << tab[i][i2];
+            cout << tab.at(i).at(i2);
         }
         cout << endl;
     }
+    
 }
+
+/*
+// https://stackoverflow.com/questions/9751932/displaying-contents-of-a-vector-container-in-c
+void Graph::print() {
+    std::copy(tab.begin(), tab.end(),
+        std::ostream_iterator<vector<int>>(
+            std::copy(tab.begin(), tab.end(),
+                std::ostream_iterator<int>(
+                std::cout, " "))
+        ));
+}
+
+
+*/
+
+
+
 
 int main(void){
     std::ofstream file ("../resources/test.txt");
