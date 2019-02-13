@@ -22,7 +22,7 @@ class Graph {
     void generateRandomGraph(ostream &o, int max);
     int getIntUpToDelimiter(string line, char delimiter);
     int **createTab(int summits);
-
+    int **get_tab();
 };
 
 int **Graph::createTab(int summits) {
@@ -43,7 +43,7 @@ Graph::Graph(int summits) {
 
 Graph::Graph(ifstream &i) {
     string line;
-    cout << "reading file" << endl;
+    // cout << "reading file" << endl;
     getIntUpToDelimiter("", ' '); // to reset static int to 0
     if (i.is_open()) {
         getline(i, line);
@@ -51,14 +51,14 @@ Graph::Graph(ifstream &i) {
             cout << "Wrong file" << endl;
             exit(0);    
         }
-        cout << "aretes: " << line << endl;
+        // cout << "aretes: " << line << endl;
         this->summits = stoi(line);
         this->tab = createTab(this->summits);
         while (getline(i, line)) {
             if (line.size() <= 0) {
                 return ;
             }
-            cout << line << endl;
+            // cout << line << endl;
             int node = getIntUpToDelimiter(line, ' ');
             if (node == -1) {
                 cout << "Wrong file" << endl;
@@ -76,7 +76,7 @@ Graph::Graph(ifstream &i) {
             }
             getIntUpToDelimiter("", ' '); // to reset static
             this->tab[node][node2] = weight;
-            cout << "node1: " << node << " node2: " << node2 << " weight: " << weight << endl;
+            // cout << "node1: " << node << " node2: " << node2 << " weight: " << weight << endl;
         }
     }
 }
@@ -106,6 +106,10 @@ Graph::~Graph() {
         delete[] tab[i];
     }
     delete[] tab;*/
+}
+
+int **Graph::get_tab() {
+    return this->tab;
 }
 
 auto Graph::generateRandomWeight(int max) {
@@ -230,33 +234,100 @@ list<list<int>> generate_one_permutations(int n, int depart) {
     return ret;
 }
 
-/*list<int> distances_boucles(list<list<int>> lb, int **tab) {
-
-}*/
+list<int> distances_boucles(list<list<int>> lb, int **tab) {
+    list<int> ret;
+    for_each(lb.begin(), lb.end(), [&ret, tab](list<int> boucle){
+        int distance = 0;
+        for (list<int>::iterator it = boucle.begin(); next(it) != boucle.end(); it++) {
+            // cout << "tab[" << *it << "][" << *next(it) << "] = " << tab[*it][*next(it)] << endl;
+            distance += tab[*it][*next(it)];
+        }
+        ret.push_back(distance);
+    });
+    return ret;
+}
 
 list<list<int>> genere_boucle(int n, int depart) {
     return generate_one_permutations(n, depart);
 }
 
+pair<int, list<int>> meilleure_boucle(list<list<int>> lb, int **tab) {
+    pair<int, list<int>> ret;
+    list<int> l = distances_boucles(lb, tab);
+    list<list<int>>::iterator it = lb.begin();
+    auto min_it = min_element(l.begin(), l.end());
+    int min_index = distance(l.begin(), min_it);
+    for (int i = 0; it != lb.end() && i < min_index; i++) {
+        it++;
+    }
+    if (it != lb.end()) {
+        return make_pair(*min_it, *it);
+    }
+    return make_pair(-1, l);
+}
 
-int main(void){
+void test_meilleure_boucle(Graph g2) {
+    int **tab = g2.get_tab();
+    list<list<int>> lb = generate_permutations(4);
+    pair<int, list<int>> m_b = meilleure_boucle(lb, tab);
+    if (m_b.first == -1) {
+        cout << "Echec de la fonction meilleure_boucle." << endl;
+        return ;
+    }
+    cout << "La plus courte distance est " << m_b.first << " pour: ";
+    for_each(m_b.second.begin(), m_b.second.end(), [](auto a) {
+        cout << a << " ";
+    });
+    cout << endl;
+}
+
+void test_permutations() {
+    list<list<int>> tmp = generate_permutations(4);
+    for_each(tmp.begin(), tmp.end(), [](list<int> l){
+        for_each(l.begin(), l.end(), [](int a){cout << a << " ";});
+        cout << endl;
+    });
+}
+
+void test_one_permutation() {
     list<list<int>> tmp = generate_one_permutations(3, 1);
     for_each(tmp.begin(), tmp.end(), [](list<int> l){
         for_each(l.begin(), l.end(), [](int a){cout << a << " ";});
         cout << endl;
     });
+}
+
+void test_distances_boucle(Graph g2) {
+    int **tab = g2.get_tab();
+    list<list<int>> lb = generate_permutations(4);
+    list<int> l = distances_boucles(lb, tab);
+    cout << "distances: " << endl;
+    list<list<int>>::iterator it = lb.begin();
+    for_each(l.begin(), l.end(), [&it, lb](int distance){
+        cout << "[ ";
+        for_each(it->begin(), it->end(), [](auto noeud){
+            cout << noeud << " ";
+        });
+        it++;
+        cout << "] = " << distance << endl;
+    });
+    cout << endl;
+}
+
+int main(void){
     /*std::ofstream file ("../resources/test.txt");
     srand (time(NULL));
     Graph g(5);
     cout << "starting pvc" << endl;
-    g.print();
     g.generateRandomGraph(file, 10);
     file.close();
-    std::ifstream input("../resources/test.txt");
+    g.print();*/
+    std::ifstream input("../resources/complet.txt");
     Graph g2(input);
     cout << "created" << endl;
     g2.print();
-    input.close();*/
+    input.close();
+    test_meilleure_boucle(g2);
     return (0);
 }
 
