@@ -11,29 +11,30 @@ using namespace std;
 class Graph {
     private:
     vector<vector<int>> tab;
-    int summits = 0;
+    int sommets = 0;
 
 
     public:
-    Graph(int summits);
+    Graph(int sommets);
     Graph(ifstream &i);
     ~Graph();
     void print();
     auto generateRandomWeight(int max);
     void generateRandomGraph(ostream &o, int max);
     int getIntUpToDelimiter(string line, char delimiter);
-    vector<vector<int>> createTab(int summits);
+    vector<vector<int>> createTab(int sommets);
     vector<vector<int>> get_tab();
+    int get_sommets();
 };
 
-vector<vector<int>> Graph::createTab(int summits) {
-    vector<vector<int>> tabtmp(summits, vector<int>(summits, 0));
+vector<vector<int>> Graph::createTab(int sommets) {
+    vector<vector<int>> tabtmp(sommets, vector<int>(sommets, 0));
     return tabtmp;
 }
 
-Graph::Graph(int summits) {
-    this->summits = summits;
-    this->tab = createTab(summits);
+Graph::Graph(int sommets) {
+    this->sommets = sommets;
+    this->tab = createTab(sommets);
 }
 
 Graph::Graph(ifstream &i) {
@@ -47,8 +48,8 @@ Graph::Graph(ifstream &i) {
             exit(0);    
         }
         // cout << "aretes: " << line << endl;
-        this->summits = stoi(line);
-        this->tab = createTab(this->summits);
+        this->sommets = stoi(line);
+        this->tab = createTab(this->sommets);
         while (getline(i, line)) {
             if (line.size() <= 0) {
                 return ;
@@ -96,7 +97,7 @@ int Graph::getIntUpToDelimiter(string line, char delimiter) {
 }
 
 Graph::~Graph() {
-    /*for (int i = 0 ; i < summits; i++)
+    /*for (int i = 0 ; i < sommets; i++)
     {
         delete[] tab[i];
     }
@@ -107,9 +108,12 @@ vector<vector<int>> Graph::get_tab() {
     return this->tab;
 }
 
+int Graph::get_sommets() {
+    return this->sommets;
+}
 auto Graph::generateRandomWeight(int max) {
     std::list<int> ret;
-    for (int i = 0; i < this->summits;i++) {
+    for (int i = 0; i < this->sommets;i++) {
         ret.push_back(rand() % max);
     }
     // for_each(ret.begin(), ret.end(), [](int n){cout << n << endl;});
@@ -125,8 +129,8 @@ void Graph::generateRandomGraph(ostream &o, int max) {
 }
 
 void Graph::print() {
-    for (int i = 0; i < this->summits; i++) {
-        for (int i2 = 0; i2 < this->summits; i2++) {
+    for (int i = 0; i < this->sommets; i++) {
+        for (int i2 = 0; i2 < this->sommets; i2++) {
             cout << tab[i][i2];
         }
         cout << endl;
@@ -189,10 +193,13 @@ list<int> distances_boucles(list<list<int>> lb, vector<vector<int>> tab) {
     list<int> ret;
     for_each(lb.begin(), lb.end(), [&ret, tab](list<int> boucle){
         int distance = 0;
+        int last_index = 0;
         for (list<int>::iterator it = boucle.begin(); next(it) != boucle.end(); it++) {
             // cout << "tab[" << *it << "][" << *next(it) << "] = " << tab[*it][*next(it)] << endl;
             distance += tab[*it][*next(it)];
+            last_index = *next(it);
         }
+        distance += tab[last_index][*(boucle.begin())]; // return to first index.
         ret.push_back(distance);
     });
     return ret;
@@ -217,9 +224,24 @@ pair<int, list<int>> meilleure_boucle(list<list<int>> lb, vector<vector<int>> ta
     return make_pair(-1, l);
 }
 
+void bruteforce_pvc(Graph g2) {
+    vector<vector<int>> tab = g2.get_tab();
+    list<list<int>> lb = generate_permutations(g2.get_sommets());
+    pair<int, list<int>> m_b = meilleure_boucle(lb, tab);
+    if (m_b.first == -1) {
+        cout << "Echec de la fonction meilleure_boucle." << endl;
+        return ;
+    }
+    cout << "La plus courte distance est " << m_b.first << " pour: ";
+    for_each(m_b.second.begin(), m_b.second.end(), [](auto a) {
+        cout << a << " ";
+    });
+    cout << endl;
+}
+
 void test_meilleure_boucle(Graph g2) {
     vector<vector<int>> tab = g2.get_tab();
-    list<list<int>> lb = generate_permutations(4);
+    list<list<int>> lb = generate_permutations(g2.get_sommets());
     pair<int, list<int>> m_b = meilleure_boucle(lb, tab);
     if (m_b.first == -1) {
         cout << "Echec de la fonction meilleure_boucle." << endl;
@@ -278,8 +300,9 @@ int main(void){
     cout << "created" << endl;
     g2.print();
     input.close();
+    bruteforce_pvc(g2);
     // test_permutations();
-    test_meilleure_boucle(g2);
+    // test_meilleure_boucle(g2);
     return (0);
 }
 
