@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <map>
 
 using namespace std;
 
@@ -226,7 +227,7 @@ pair<int, list<int>> meilleure_boucle(list<list<int>> lb, vector<vector<int>> ta
 
 void bruteforce_pvc(Graph g2) {
     vector<vector<int>> tab = g2.get_tab();
-    list<list<int>> lb = generate_permutations(g2.get_sommets());
+    list<list<int>> lb = generate_one_permutations(g2.get_sommets(), 0);
     pair<int, list<int>> m_b = meilleure_boucle(lb, tab);
     if (m_b.first == -1) {
         cout << "Echec de la fonction meilleure_boucle." << endl;
@@ -237,6 +238,40 @@ void bruteforce_pvc(Graph g2) {
         cout << a << " ";
     });
     cout << endl;
+}
+
+void coord_vers_matrice(list<pair<int, int>> lc) {
+    map<int, int> from_coord_to_index;
+    map<int, int> from_index_to_coord;
+    for (int i = 0; i < lc.size();i++) {
+        from_coord_to_index[i] = -1;
+    }
+    int i = 0;
+    for_each(lc.begin(), lc.end(), [&from_coord_to_index, &i](auto coord){
+        if (from_coord_to_index.find(coord.first) == from_coord_to_index.end()) {
+            from_coord_to_index[coord.first] = i;
+            from_index_to_coord[i] = coord.first;
+            i++;
+        }
+        if (from_coord_to_index.find(coord.second) == from_coord_to_index.end()) {
+            from_coord_to_index[coord.second] = i;
+            from_index_to_coord[i] = coord.second;
+            i++;
+        }
+    });
+    vector<vector<int>> tab(i);
+    for_each(lc.begin(), lc.end(), [&from_coord_to_index, &i](auto coord){
+        tab[from_coord_to_index[coord.first]][from_coord_to_index[coord.second]] = distance(coord);
+    });
+    //put coord vers matrice in class to have access to both maps everywhere
+}
+
+
+void test_coord_vers_matrice() {
+    list<pair<int, int>> lc = {make_pair(0, 0), make_pair(1, 1),
+        make_pair(2, 4), make_pair(1, -3), make_pair(0, -5), make_pair(0, 4),
+        make_pair(-1, 5), make_pair(-2, 3), make_pair(-3, 0)};
+    coord_vers_matrice(lc);
 }
 
 void test_meilleure_boucle(Graph g2) {
@@ -300,7 +335,8 @@ int main(void){
     cout << "created" << endl;
     g2.print();
     input.close();
-    bruteforce_pvc(g2);
+    test_coord_vers_matrice();
+    // bruteforce_pvc(g2);
     // test_permutations();
     // test_meilleure_boucle(g2);
     return (0);
