@@ -4,12 +4,13 @@
 #include <time.h>
 #include <string>
 #include <fstream>
+#include <vector>
 
 using namespace std;
 
 class Graph {
     private:
-    int **tab;
+    vector<vector<int>> tab;
     int summits = 0;
 
 
@@ -21,18 +22,12 @@ class Graph {
     auto generateRandomWeight(int max);
     void generateRandomGraph(ostream &o, int max);
     int getIntUpToDelimiter(string line, char delimiter);
-    int **createTab(int summits);
-    int **get_tab();
+    vector<vector<int>> createTab(int summits);
+    vector<vector<int>> get_tab();
 };
 
-int **Graph::createTab(int summits) {
-    int **tabtmp = new int*[summits];
-    for (int i = 0; i < summits;i++) {
-        tabtmp[i] = new int[summits];
-        for (int i2 = 0; i2 < summits; i2++) {
-            tabtmp[i][i2] = 0;
-        }
-    }
+vector<vector<int>> Graph::createTab(int summits) {
+    vector<vector<int>> tabtmp(summits, vector<int>(summits, 0));
     return tabtmp;
 }
 
@@ -108,7 +103,7 @@ Graph::~Graph() {
     delete[] tab;*/
 }
 
-int **Graph::get_tab() {
+vector<vector<int>> Graph::get_tab() {
     return this->tab;
 }
 
@@ -146,7 +141,7 @@ list<int> trouver_permutation(int *order, int n, int index) {
     return ret;
 }
 
-void permut_tab(int **tab, int nb_permut, int n) {
+void permut_tab(vector<int> *tab, int nb_permut, int n) {
     int swap = 0;
     //0, 1, 2
     //swap = 1
@@ -178,14 +173,6 @@ int factorial(int input) {
     return res;
 }
 
-int *create_tab(int n) {
-    int *tab = new int[n];
-    for (int i = 0; i < n; i++) {
-        tab[i] = i;
-    }
-    return tab;
-}
-
 void swap(int *x, int *y) 
 { 
     int temp; 
@@ -194,47 +181,51 @@ void swap(int *x, int *y)
     *y = temp; 
 } 
   
-void permute(list<list<int>> *ret, int *tab, int l, int n) 
+void permute(list<list<int>> *ret, vector<int> tab, int l, int n) 
 { 
-   int i; 
-   if (l == n) {
-       list<int> tmp;
-       for (int index = 0; index <= n; index++) {
-           tmp.push_back(tab[index]);
-       }
-       ret->push_back(tmp);
-   }
+    int i; 
+    if (l == n) {
+        list<int> tmp;
+        for (int index = 0; index <= n; index++) {
+            tmp.push_back(tab[index]);
+        }
+        ret->push_back(tmp);
+    }
      
-   else
-   { 
-       for (i = l; i <= n; i++) 
-       { 
-          swap((tab + l), (tab + i)); 
-          permute(ret, tab, l + 1, n); 
-          swap((tab + l), (tab + i));
-       } 
-   } 
+    else
+    { 
+        for (i = l; i <= n; i++) 
+        {
+            iter_swap(tab.begin() + l, tab.begin() + i);
+            permute(ret, tab, l + 1, n); 
+            iter_swap(tab.begin() + l, tab.begin() + i);
+        }
+    } 
 } 
 
 list<list<int>> generate_permutations(int n) {
     list<list<int>> ret;
-    int *tab = create_tab(n);
+    vector<int> tab(n);
+    for (int i = 0; i < n; i++) {
+        tab[i] = i;
+    }
     permute(&ret, tab, 0, n - 1);
-    delete tab;
     return ret;
 }
 
 list<list<int>> generate_one_permutations(int n, int depart) {
     list<list<int>> ret;
-    int *tab = create_tab(n);
+    vector<int> tab(n);
+    for (int i = 0; i < n; i++) {
+        tab[i] = i;
+    }
     tab[depart] = 0;
     tab[0] = depart;
     permute(&ret, tab, 1, n - 1);
-    delete tab;
     return ret;
 }
 
-list<int> distances_boucles(list<list<int>> lb, int **tab) {
+list<int> distances_boucles(list<list<int>> lb, vector<vector<int>> tab) {
     list<int> ret;
     for_each(lb.begin(), lb.end(), [&ret, tab](list<int> boucle){
         int distance = 0;
@@ -251,7 +242,7 @@ list<list<int>> genere_boucle(int n, int depart) {
     return generate_one_permutations(n, depart);
 }
 
-pair<int, list<int>> meilleure_boucle(list<list<int>> lb, int **tab) {
+pair<int, list<int>> meilleure_boucle(list<list<int>> lb, vector<vector<int>> tab) {
     pair<int, list<int>> ret;
     list<int> l = distances_boucles(lb, tab);
     list<list<int>>::iterator it = lb.begin();
@@ -267,7 +258,7 @@ pair<int, list<int>> meilleure_boucle(list<list<int>> lb, int **tab) {
 }
 
 void test_meilleure_boucle(Graph g2) {
-    int **tab = g2.get_tab();
+    vector<vector<int>> tab = g2.get_tab();
     list<list<int>> lb = generate_permutations(4);
     pair<int, list<int>> m_b = meilleure_boucle(lb, tab);
     if (m_b.first == -1) {
@@ -298,7 +289,7 @@ void test_one_permutation() {
 }
 
 void test_distances_boucle(Graph g2) {
-    int **tab = g2.get_tab();
+    vector<vector<int>> tab = g2.get_tab();
     list<list<int>> lb = generate_permutations(4);
     list<int> l = distances_boucles(lb, tab);
     cout << "distances: " << endl;
@@ -327,7 +318,8 @@ int main(void){
     cout << "created" << endl;
     g2.print();
     input.close();
-    test_meilleure_boucle(g2);
+    test_permutations();
+    //test_meilleure_boucle(g2);
     return (0);
 }
 
