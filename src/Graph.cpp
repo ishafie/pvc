@@ -141,46 +141,6 @@ list<int> trouver_permutation(int *order, int n, int index) {
     return ret;
 }
 
-void permut_tab(vector<int> *tab, int nb_permut, int n) {
-    int swap = 0;
-    //0, 1, 2
-    //swap = 1
-    //1, 0, 2
-    //1,0,2 - 2,1,0 - 0,2,1
-    //swap = 0
-    //1, 2, 0  
-        //cout << "index[" << i % n << "] = "<< (*tab)[i %n] <<", index + 1["<< (i + 1) % n << "] " << (*tab)[(i + 1) % n]  << endl;
-
-    cout << "nb: " << nb_permut << endl;
-    for (int i = 0; i < n; i++) {
-        cout << (*tab)[i] << " ";
-    }
-    cout << endl;
-    for (int i = 0; i < nb_permut; i++) {
-        swap = (*tab)[i % n];
-        (*tab)[i] = (*tab)[(i + 1) % n];
-        (*tab)[(i + 1) % n] = swap;
-    }
-}
-int factorial(int input) {
-    if (input <= 0)
-        return 0;
-    int res = 1;    
-    while (input > 1) {
-        res *= input;
-        input -= 1;
-    }
-    return res;
-}
-
-void swap(int *x, int *y) 
-{ 
-    int temp; 
-    temp = *x; 
-    *x = *y; 
-    *y = temp; 
-} 
-  
 void permute(list<list<int>> *ret, vector<int> tab, int l, int n) 
 { 
     int i; 
@@ -318,8 +278,8 @@ int main(void){
     cout << "created" << endl;
     g2.print();
     input.close();
-    test_permutations();
-    //test_meilleure_boucle(g2);
+    // test_permutations();
+    test_meilleure_boucle(g2);
     return (0);
 }
 
