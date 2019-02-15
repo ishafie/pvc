@@ -9,10 +9,28 @@
 
 using namespace std;
 
+class Matrice {
+    private:
+    map<int, int> from_coord_to_index;
+    map<int, int> from_index_to_coord;
+    vector<vector<int>> tab;
+
+    public:
+    Matrice(map<int, int> fcti, map<int, int> fitc, vector<vector<int>> tab);
+    map<int, int> getCoordToIndex();
+    map<int, int> getIndexToCoord();
+    vector<vector<int>> getMatrice();
+};
+
+Matrice::Matrice(map<int, int> fcti, map<int, int> fitc, vector<vector<int>> tab): 
+    from_coord_to_index{fcti}, from_index_to_coord{fitc}, tab{tab} {
+}
+
 class Graph {
     private:
     vector<vector<int>> tab;
     int sommets = 0;
+    
 
 
     public:
@@ -240,7 +258,12 @@ void bruteforce_pvc(Graph g2) {
     cout << endl;
 }
 
-void coord_vers_matrice(list<pair<int, int>> lc) {
+int distance(pair<int, int> coord) {
+    // do distance
+    return 0;
+}
+
+Matrice coord_vers_matrice(list<pair<int, int>> lc) {
     map<int, int> from_coord_to_index;
     map<int, int> from_index_to_coord;
     for (int i = 0; i < lc.size();i++) {
@@ -263,6 +286,7 @@ void coord_vers_matrice(list<pair<int, int>> lc) {
     for_each(lc.begin(), lc.end(), [&from_coord_to_index, &i](auto coord){
         tab[from_coord_to_index[coord.first]][from_coord_to_index[coord.second]] = distance(coord);
     });
+    return Matrice(from_coord_to_index, from_index_to_coord, tab);
     //put coord vers matrice in class to have access to both maps everywhere
 }
 
