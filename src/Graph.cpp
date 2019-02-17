@@ -6,24 +6,53 @@
 #include <fstream>
 #include <vector>
 #include <map>
+#include <math.h>
 
 using namespace std;
 
 class Matrice {
     private:
-    map<int, int> from_coord_to_index;
-    map<int, int> from_index_to_coord;
+    map<pair<int, int>, int> from_coord_to_index;
+    map<int, pair<int, int>> from_index_to_coord;
     vector<vector<int>> tab;
+    int sommets;
 
     public:
-    Matrice(map<int, int> fcti, map<int, int> fitc, vector<vector<int>> tab);
-    map<int, int> getCoordToIndex();
-    map<int, int> getIndexToCoord();
-    vector<vector<int>> getMatrice();
+    Matrice(map<pair<int, int>, int> fcti, map<int, pair<int, int>> fitc, vector<vector<int>> tab, int sommets);
+    map<pair<int, int>, int> get_coord_to_index();
+    map<int, pair<int, int>> get_index_to_coord();
+    void print();
+    vector<vector<int>> get_matrice();
+    int get_sommets();
 };
 
-Matrice::Matrice(map<int, int> fcti, map<int, int> fitc, vector<vector<int>> tab): 
-    from_coord_to_index{fcti}, from_index_to_coord{fitc}, tab{tab} {
+Matrice::Matrice(map<pair<int, int>, int> fcti, map<int, pair<int, int>> fitc, vector<vector<int>> tab, int sommets): 
+    from_coord_to_index{fcti}, from_index_to_coord{fitc}, tab{tab}, sommets{sommets} {
+}
+
+map<pair<int, int>, int> Matrice::get_coord_to_index() {
+    return this->from_coord_to_index;
+}
+
+map<int, pair<int, int>> Matrice::get_index_to_coord() {
+    return this->from_index_to_coord;
+}
+
+vector<vector<int>> Matrice::get_matrice() {
+    return this->tab;
+}
+
+int Matrice::get_sommets() {
+    return this->sommets;
+}
+
+void Matrice::print() {
+    for (int i = 0; i < this->sommets; i++) {
+        for (int i2 = 0; i2 < this->sommets; i2++) {
+            cout << tab[i][i2];
+        }
+        cout << endl;
+    }
 }
 
 class Graph {
@@ -258,44 +287,72 @@ void bruteforce_pvc(Graph g2) {
     cout << endl;
 }
 
-int distance(pair<int, int> coord) {
-    // do distance
-    return 0;
+
+int distance(pair<int, int> a, pair<int, int> b) {
+    return sqrt(((b.first - a.first) * (b.first - a.first)) + ((b.second - a.second) * (b.second - a.second)));
 }
 
 Matrice coord_vers_matrice(list<pair<int, int>> lc) {
-    map<int, int> from_coord_to_index;
-    map<int, int> from_index_to_coord;
-    for (int i = 0; i < lc.size();i++) {
-        from_coord_to_index[i] = -1;
-    }
+    map<pair<int, int>, int> from_coord_to_index;
+    map<int, pair<int, int>> from_index_to_coord;
     int i = 0;
-    for_each(lc.begin(), lc.end(), [&from_coord_to_index, &i](auto coord){
-        if (from_coord_to_index.find(coord.first) == from_coord_to_index.end()) {
-            from_coord_to_index[coord.first] = i;
-            from_index_to_coord[i] = coord.first;
-            i++;
-        }
-        if (from_coord_to_index.find(coord.second) == from_coord_to_index.end()) {
-            from_coord_to_index[coord.second] = i;
-            from_index_to_coord[i] = coord.second;
+    int x = 0;
+    int y = 0;
+    int d = 0;
+
+    for_each(lc.begin(), lc.end(), [&from_index_to_coord, &from_coord_to_index, &i](auto coord){
+        if (from_coord_to_index.find(coord) == from_coord_to_index.end()) {
+            from_coord_to_index[coord] = i;
+            from_index_to_coord[i] = coord;
             i++;
         }
     });
-    vector<vector<int>> tab(i);
-    for_each(lc.begin(), lc.end(), [&from_coord_to_index, &i](auto coord){
-        tab[from_coord_to_index[coord.first]][from_coord_to_index[coord.second]] = distance(coord);
-    });
-    return Matrice(from_coord_to_index, from_index_to_coord, tab);
-    //put coord vers matrice in class to have access to both maps everywhere
+    vector<vector<int>> tab(i + 1, vector<int>(i + 1, 0));
+    list<pair<int, int>>::iterator it = lc.begin();
+    for (it; it != lc.end(); it++) {
+        for (list<pair<int, int>>::iterator it2 = lc.begin(); it2 != lc.end(); it2++) {
+            d = distance(*it, *it2);
+            // cout << "(" << it->first << ", " << it->second << ") => ";
+            // cout << "(" << it2->first << ", " << it2->second << ") => " << "[" << from_coord_to_index[*it] << "][" << from_coord_to_index[*it2] << "] : " << d << endl;
+            x = from_coord_to_index[*it];
+            y = from_coord_to_index[*it2];
+            tab[x][y] = d;
+        }
+    }
+    return Matrice(from_coord_to_index, from_index_to_coord, tab, i);
 }
 
+void bruteforce_pvc_coords(list<pair<int, int>> lc) {
+    Matrice m = coord_vers_matrice(lc);
+    map<int, pair<int, int>> from_index_to_coord = m.get_index_to_coord();
+    vector<vector<int>> tab = m.get_matrice();
+    list<list<int>> lb = generate_one_permutations(m.get_sommets(), 0);
+    pair<int, list<int>> m_b = meilleure_boucle(lb, tab);
+    if (m_b.first == -1) {
+        cout << "Echec de la fonction meilleure_boucle." << endl;
+        return ;
+    }
+    cout << "La plus courte distance est " << m_b.first << " pour: " << endl;
+    for_each(m_b.second.begin(), m_b.second.end(), [&from_index_to_coord](auto a) {
+        pair<int, int> coords = from_index_to_coord[a];
+        cout << "(" << coords.first << ", " << coords.second << ")" << endl;
+    });
+    
+}
+
+void test_bruteforce_pvc_coords() {
+    list<pair<int, int>> lc = {make_pair(0, 0), make_pair(1, 1),
+        make_pair(2, 4), make_pair(1, -3), make_pair(0, -5), make_pair(0, 4),
+        make_pair(-1, 5), make_pair(-2, 3), make_pair(-3, 0)};
+    bruteforce_pvc_coords(lc);
+}
 
 void test_coord_vers_matrice() {
     list<pair<int, int>> lc = {make_pair(0, 0), make_pair(1, 1),
         make_pair(2, 4), make_pair(1, -3), make_pair(0, -5), make_pair(0, 4),
         make_pair(-1, 5), make_pair(-2, 3), make_pair(-3, 0)};
-    coord_vers_matrice(lc);
+    Matrice m = coord_vers_matrice(lc);
+    m.print();
 }
 
 void test_meilleure_boucle(Graph g2) {
@@ -359,7 +416,7 @@ int main(void){
     cout << "created" << endl;
     g2.print();
     input.close();
-    test_coord_vers_matrice();
+    test_bruteforce_pvc_coords();
     // bruteforce_pvc(g2);
     // test_permutations();
     // test_meilleure_boucle(g2);
