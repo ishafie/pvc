@@ -4,37 +4,76 @@
 #include <time.h>
 #include <string>
 #include <fstream>
+#include <vector>
+#include <map>
+#include <math.h>
 
 #include "Algo.h"
 #include "Graph.h"
 
+
 using namespace std;
 
-std::vector<std::vector<int> > Graph::createTab(int summits) {
-    std::vector<std::vector<int> > tabtmp(summits, std::vector<int>(summits,0));
-    /*
-    for (std::vector<int> row : tabtmp)
-        row = std::vector<int>(summits,0);
-        */
-    /*
-    for (int i = 0; i < summits;i++) {
-        tabtmp[i] = new int[summits];
-        for (int i2 = 0; i2 < summits; i2++) {
-            tabtmp[i][i2] = 0;
+class Matrice {
+    private:
+    map<pair<int, int>, int> from_coord_to_index;
+    map<int, pair<int, int>> from_index_to_coord;
+    vector<vector<int>> tab;
+    int sommets;
+
+    public:
+    Matrice(map<pair<int, int>, int> fcti, map<int, pair<int, int>> fitc, vector<vector<int>> tab, int sommets);
+    map<pair<int, int>, int> get_coord_to_index();
+    map<int, pair<int, int>> get_index_to_coord();
+    void print();
+    vector<vector<int>> get_matrice();
+    int get_sommets();
+};
+
+Matrice::Matrice(map<pair<int, int>, int> fcti, map<int, pair<int, int>> fitc, vector<vector<int>> tab, int sommets): 
+    from_coord_to_index{fcti}, from_index_to_coord{fitc}, tab{tab}, sommets{sommets} {
+}
+
+map<pair<int, int>, int> Matrice::get_coord_to_index() {
+    return this->from_coord_to_index;
+}
+
+map<int, pair<int, int>> Matrice::get_index_to_coord() {
+    return this->from_index_to_coord;
+}
+
+vector<vector<int>> Matrice::get_matrice() {
+    return this->tab;
+}
+
+int Matrice::get_sommets() {
+    return this->sommets;
+}
+
+void Matrice::print() {
+    for (int i = 0; i < this->sommets; i++) {
+        for (int i2 = 0; i2 < this->sommets; i2++) {
+            cout << tab[i][i2];
         }
+        cout << endl;
     }
-    */
+}
+
+
+
+vector<vector<int>> Graph::createTab(int sommets) {
+    vector<vector<int>> tabtmp(sommets, vector<int>(sommets, 0));
     return tabtmp;
 }
 
-Graph::Graph(int summits) {
-    this->summits = summits;
-    this->tab = createTab(summits);
+Graph::Graph(int sommets) {
+    this->sommets = sommets;
+    this->tab = createTab(sommets);
 }
 
 Graph::Graph(std::ifstream &i) {
     string line;
-    cout << "reading file" << endl;
+    // cout << "reading file" << endl;
     getIntUpToDelimiter("", ' '); // to reset static int to 0
     if (i.is_open()) {
         getline(i, line);
@@ -42,14 +81,14 @@ Graph::Graph(std::ifstream &i) {
             cout << "Wrong file" << endl;
             exit(0);    
         }
-        cout << "aretes: " << line << endl;
-        this->summits = stoi(line);
-        this->tab = createTab(this->summits);
+        // cout << "aretes: " << line << endl;
+        this->sommets = stoi(line);
+        this->tab = createTab(this->sommets);
         while (getline(i, line)) {
             if (line.size() <= 0) {
                 return ;
             }
-            cout << line << endl;
+            // cout << line << endl;
             int node = getIntUpToDelimiter(line, ' ');
             if (node == -1) {
                 cout << "Wrong file" << endl;
@@ -66,8 +105,10 @@ Graph::Graph(std::ifstream &i) {
                 exit(0);
             }
             getIntUpToDelimiter("", ' '); // to reset static
-            this->tab.at(node).at(node2) = weight;
-            cout << "node1: " << node << " node2: " << node2 << " weight: " << weight << endl;
+           
+            this->tab[node][node2] = weight;
+            // cout << "node1: " << node << " node2: " << node2 << " weight: " << weight << endl;
+
         }
     }
 }
@@ -92,16 +133,23 @@ int Graph::getIntUpToDelimiter(string line, char delimiter) {
 }
 
 Graph::~Graph() {
-    /*for (int i = 0 ; i < summits; i++)
+    /*for (int i = 0 ; i < sommets; i++)
     {
         delete[] tab[i];
     }
     delete[] tab;*/
 }
 
+vector<vector<int>> Graph::get_tab() {
+    return this->tab;
+}
+
+int Graph::get_sommets() {
+    return this->sommets;
+}
 auto Graph::generateRandomWeight(int max) {
     std::list<int> ret;
-    for (int i = 0; i < this->summits;i++) {
+    for (int i = 0; i < this->sommets;i++) {
         ret.push_back(rand() % max);
     }
     // for_each(ret.begin(), ret.end(), [](int n){cout << n << endl;});
@@ -117,45 +165,355 @@ void Graph::generateRandomGraph(std::ostream &o, int max) {
 }
 
 void Graph::print() {
-    
-    for (int i = 0; i < this->summits; i++) {
-        for (int i2 = 0; i2 < this->summits; i2++) {
-            cout << tab.at(i).at(i2);
+
+    for (int i = 0; i < this->sommets; i++) {
+        for (int i2 = 0; i2 < this->sommets; i2++) {
+            cout << tab[i][i2];
         }
         cout << endl;
     }
     
 }
 
-/*
-// https://stackoverflow.com/questions/9751932/displaying-contents-of-a-vector-container-in-c
-void Graph::print() {
-    std::copy(tab.begin(), tab.end(),
-        std::ostream_iterator<vector<int>>(
-            std::copy(tab.begin(), tab.end(),
-                std::ostream_iterator<int>(
-                std::cout, " "))
-        ));
+
+list<int> trouver_permutation(int *order, int n, int index) {
+    list<int> ret;
+    for (int i = 0; i < n; i++) {
+        ret.push_back(order[(i + index) % n]);
+    }
+    return ret;
+}
+
+void permute(list<list<int>> *ret, vector<int> tab, int l, int n) 
+{ 
+    int i; 
+    if (l == n) {
+        list<int> tmp;
+        for (int index = 0; index <= n; index++) {
+            tmp.push_back(tab[index]);
+        }
+        ret->push_back(tmp);
+    }
+     
+    else
+    { 
+        for (i = l; i <= n; i++) 
+        {
+            iter_swap(tab.begin() + l, tab.begin() + i);
+            permute(ret, tab, l + 1, n); 
+            iter_swap(tab.begin() + l, tab.begin() + i);
+        }
+    } 
+} 
+
+list<list<int>> generate_permutations(int n) {
+    list<list<int>> ret;
+    vector<int> tab(n);
+    for (int i = 0; i < n; i++) {
+        tab[i] = i;
+    }
+    permute(&ret, tab, 0, n - 1);
+    return ret;
+}
+
+list<list<int>> generate_one_permutations(int n, int depart) {
+    list<list<int>> ret;
+    vector<int> tab(n);
+    for (int i = 0; i < n; i++) {
+        tab[i] = i;
+    }
+    tab[depart] = 0;
+    tab[0] = depart;
+    permute(&ret, tab, 1, n - 1);
+    return ret;
+}
+
+list<int> distances_boucles(list<list<int>> lb, vector<vector<int>> tab) {
+    list<int> ret;
+    for_each(lb.begin(), lb.end(), [&ret, tab](list<int> boucle){
+        int distance = 0;
+        int last_index = 0;
+        for (list<int>::iterator it = boucle.begin(); next(it) != boucle.end(); it++) {
+            // cout << "tab[" << *it << "][" << *next(it) << "] = " << tab[*it][*next(it)] << endl;
+            distance += tab[*it][*next(it)];
+            last_index = *next(it);
+        }
+        distance += tab[last_index][*(boucle.begin())]; // return to first index.
+        ret.push_back(distance);
+    });
+    return ret;
+}
+
+list<list<int>> genere_boucle(int n, int depart) {
+    return generate_one_permutations(n, depart);
+}
+
+pair<int, list<int>> meilleure_boucle(list<list<int>> lb, vector<vector<int>> tab) {
+    pair<int, list<int>> ret;
+    list<int> l = distances_boucles(lb, tab);
+    list<list<int>>::iterator it = lb.begin();
+    auto min_it = min_element(l.begin(), l.end());
+    int min_index = distance(l.begin(), min_it);
+    for (int i = 0; it != lb.end() && i < min_index; i++) {
+        it++;
+    }
+    if (it != lb.end()) {
+        return make_pair(*min_it, *it);
+    }
+    return make_pair(-1, l);
+}
+
+void bruteforce_pvc(Graph g2) {
+    vector<vector<int>> tab = g2.get_tab();
+    list<list<int>> lb = generate_one_permutations(g2.get_sommets(), 0);
+    pair<int, list<int>> m_b = meilleure_boucle(lb, tab);
+    if (m_b.first == -1) {
+        cout << "Echec de la fonction meilleure_boucle." << endl;
+        return ;
+    }
+    cout << "La plus courte distance est " << m_b.first << " pour: ";
+    for_each(m_b.second.begin(), m_b.second.end(), [](auto a) {
+        cout << a << " ";
+    });
+    cout << endl;
 }
 
 
-*/
+int distance(pair<int, int> a, pair<int, int> b) {
+    return sqrt(((b.first - a.first) * (b.first - a.first)) + ((b.second - a.second) * (b.second - a.second)));
+}
 
+Matrice coord_vers_matrice(list<pair<int, int>> lc) {
+    map<pair<int, int>, int> from_coord_to_index;
+    map<int, pair<int, int>> from_index_to_coord;
+    int i = 0;
+    int x = 0;
+    int y = 0;
+    int d = 0;
 
+    for_each(lc.begin(), lc.end(), [&from_index_to_coord, &from_coord_to_index, &i](auto coord){
+        if (from_coord_to_index.find(coord) == from_coord_to_index.end()) {
+            from_coord_to_index[coord] = i;
+            from_index_to_coord[i] = coord;
+            i++;
+        }
+    });
+    vector<vector<int>> tab(i + 1, vector<int>(i + 1, 0));
+    list<pair<int, int>>::iterator it = lc.begin();
+    for (it; it != lc.end(); it++) {
+        for (list<pair<int, int>>::iterator it2 = lc.begin(); it2 != lc.end(); it2++) {
+            d = distance(*it, *it2);
+            // cout << "(" << it->first << ", " << it->second << ") => ";
+            // cout << "(" << it2->first << ", " << it2->second << ") => " << "[" << from_coord_to_index[*it] << "][" << from_coord_to_index[*it2] << "] : " << d << endl;
+            x = from_coord_to_index[*it];
+            y = from_coord_to_index[*it2];
+            tab[x][y] = d;
+        }
+    }
+    return Matrice(from_coord_to_index, from_index_to_coord, tab, i);
+}
+
+void bruteforce_pvc_coords(list<pair<int, int>> lc) {
+    Matrice m = coord_vers_matrice(lc);
+    map<int, pair<int, int>> from_index_to_coord = m.get_index_to_coord();
+    vector<vector<int>> tab = m.get_matrice();
+    list<list<int>> lb = generate_one_permutations(m.get_sommets(), 0);
+    pair<int, list<int>> m_b = meilleure_boucle(lb, tab);
+    if (m_b.first == -1) {
+        cout << "Echec de la fonction meilleure_boucle." << endl;
+        return ;
+    }
+    cout << "La plus courte distance est " << m_b.first << " pour: " << endl;
+    for_each(m_b.second.begin(), m_b.second.end(), [&from_index_to_coord](auto a) {
+        pair<int, int> coords = from_index_to_coord[a];
+        cout << "(" << coords.first << ", " << coords.second << ")" << endl;
+    });
+    
+}
+
+void test_bruteforce_pvc_coords() {
+    list<pair<int, int>> lc = {make_pair(0, 0), make_pair(1, 1),
+        make_pair(2, 4), make_pair(1, -3), make_pair(0, -5), make_pair(0, 4),
+        make_pair(-1, 5), make_pair(-2, 3), make_pair(-3, 0)};
+    bruteforce_pvc_coords(lc);
+}
+
+void test_coord_vers_matrice() {
+    list<pair<int, int>> lc = {make_pair(0, 0), make_pair(1, 1),
+        make_pair(2, 4), make_pair(1, -3), make_pair(0, -5), make_pair(0, 4),
+        make_pair(-1, 5), make_pair(-2, 3), make_pair(-3, 0)};
+    Matrice m = coord_vers_matrice(lc);
+    m.print();
+}
+
+void test_meilleure_boucle(Graph g2) {
+    vector<vector<int>> tab = g2.get_tab();
+    list<list<int>> lb = generate_permutations(g2.get_sommets());
+    pair<int, list<int>> m_b = meilleure_boucle(lb, tab);
+    if (m_b.first == -1) {
+        cout << "Echec de la fonction meilleure_boucle." << endl;
+        return ;
+    }
+    cout << "La plus courte distance est " << m_b.first << " pour: ";
+    for_each(m_b.second.begin(), m_b.second.end(), [](auto a) {
+        cout << a << " ";
+    });
+    cout << endl;
+}
+
+void test_permutations() {
+    list<list<int>> tmp = generate_permutations(4);
+    for_each(tmp.begin(), tmp.end(), [](list<int> l){
+        for_each(l.begin(), l.end(), [](int a){cout << a << " ";});
+        cout << endl;
+    });
+}
+
+void test_one_permutation() {
+    list<list<int>> tmp = generate_one_permutations(3, 1);
+    for_each(tmp.begin(), tmp.end(), [](list<int> l){
+        for_each(l.begin(), l.end(), [](int a){cout << a << " ";});
+        cout << endl;
+    });
+}
+
+void test_distances_boucle(Graph g2) {
+    vector<vector<int>> tab = g2.get_tab();
+    list<list<int>> lb = generate_permutations(4);
+    list<int> l = distances_boucles(lb, tab);
+    cout << "distances: " << endl;
+    list<list<int>>::iterator it = lb.begin();
+    for_each(l.begin(), l.end(), [&it, lb](int distance){
+        cout << "[ ";
+        for_each(it->begin(), it->end(), [](auto noeud){
+            cout << noeud << " ";
+        });
+        it++;
+        cout << "] = " << distance << endl;
+    });
+    cout << endl;
+}
 
 
 int main(void){
-    std::ofstream file ("../resources/test.txt");
+    /*std::ofstream file ("../resources/test.txt");
     srand (time(NULL));
     Graph g(5);
     cout << "starting pvc" << endl;
-    g.print();
     g.generateRandomGraph(file, 10);
     file.close();
-    std::ifstream input("../resources/test.txt");
+    g.print();*/
+    std::ifstream input("../resources/complet.txt");
     Graph g2(input);
     cout << "created" << endl;
     g2.print();
     input.close();
+    test_bruteforce_pvc_coords();
+    // bruteforce_pvc(g2);
+    // test_permutations();
+    // test_meilleure_boucle(g2);
     return (0);
 }
+
+
+
+
+   /* 
+    [ 0 1 2 3 ]
+    [ 1 2 3 0 ]
+    [ 2 3 0 1 ]
+    [ 3 0 1 2 ]
+
+    [ 1 0 2 3 ]
+    [ 0 2 3 1 ]
+    [ 2 3 1 0 ]
+    [ 3 1 0 2 ]
+
+    [ 0 2 1 3 ]
+    [ 2 1 3 0 ]
+    [ 1 3 0 2 ]
+    [ 3 0 2 1 ]
+
+    [ 2 3 0 1 ]
+    [ 3 0 1 2 ]
+    [ 0 1 2 3 ]
+    [ 1 2 3 0 ]
+
+
+    [ 2 1 3 0 ]
+    [ 1 3 0 2 ]
+    [ 3 0 2 1 ]
+    [ 0 2 1 3 ]
+
+    [ 1 2 3 0 ]
+    [ 2 3 0 1 ]
+    [ 3 0 1 2 ]
+    [ 0 1 2 3 ]
+-----
+    0 1 2 3 > swap 1 - 2
+    0 2 1 3 > swap 1 - 3, retour au debut
+    0 2 3 1 > swap 2 - 3
+    0 3 2 1 > swap 2 - 1, retour au debut
+    0 3 1 2 > swap 3 - 1
+    0 1 3 2 > swap 3 - 2, retour au debut, facto6 donc stop
+
+    1 0 2 3 > swap 0 - 2
+    1 2 0 3 > swap 0 - 3, retour au debut
+    1 2 3 0 > swap 2 - 3
+    1 3 2 0 > swap 2 - 0, retour au debut
+    1 3 0 2 > swap 3 - 0
+    1 0 3 2 > swap 3 - 2, retour au debut, facto6 donc stop
+
+    0 1 2 > swap 1 - 2
+    0 2 1 > retour au debut
+    1 0 2 > swap 0 - 2
+    1 2 0 > retour au debut
+    2 1 0 > swap 1 - 0
+    2 0 1 > retour au debut
+
+
+    0 1 2 3 4 > swap 1 - 2
+    0 2 1 3 4 > swap 1 - 3
+    0 2 3 1 4 > swap 1 - 4, retour au debut
+    0 2 3 4 1 > swap 2 - 3
+
+    0 3 2 4 1 > swap 2 - 4
+    0 3 4 2 1 > swap 2 - 1, retour au debut
+    0 3 4 1 2 > swap 3 - 4
+
+    0 4 3 1 2 > swap 3 - 1
+    0 4 1 3 2 > swap 3 - 2, retour au debut
+    0 4 1 2 3 > swap 4 - 1
+
+    0 1 4 2 3 > swap 4 - 2
+    0 1 2 4 3 > swap 4 - 3, retour au début
+
+
+    (23)
+
+-----
+    0 1 2 3
+    0 1 3 2
+    0 2 1 3
+    0 2 3 1
+    0 3 1 2
+    0 3 2 1
+
+    1 0 2 3
+    1 0 3 2
+    1 2 0 3
+    1 2 3 0
+    1 3 0 2
+    1 3 2 0
+    2 0 1 3
+    2 0 3 1
+    2 1 0 3
+    2 1 3 0
+    2 3 0 1
+    2 3 1 0
+    3 0 1 2
+    3 0 2 1
+    3 1 2 0
+    3 1 0 2
+    3 2 0 1
+    3 2 1 0*/

@@ -11,35 +11,19 @@
   * class Graph
   * 
   */
-
-
-
-
+  
 class Graph
 {
 
    private:
     
     std::vector<std::vector<int> >tab;
-    int summits = 0;
+    int sommets = 0;
+    
+
 
 
 public:
-    
-  // Constructors/Destructors
-  //  
-
-
-  /**
-   * Empty Constructor
-   */
-  Graph ();
-
-  /**
-   * Empty Destructor
-   */
-  virtual ~Graph ();
-
 
   /**
    * @param  sommets
@@ -48,8 +32,7 @@ public:
   void generer_poids_aleatoire (int sommets, int max)
   {
   }
-
-
+  
   /**
    * @param  out
    */
@@ -92,18 +75,16 @@ public:
 
 
 public:
-    Graph(int summits);
+    Graph(int sommets);
     Graph(std::ifstream &i);
+    ~Graph();
     void print();
     auto generateRandomWeight(int max);
     void generateRandomGraph(std::ostream &o, int max);
     int getIntUpToDelimiter(std::string line, char delimiter);
-    std::vector<std::vector<int> >createTab(int summits);
-
-  // Private attribute accessor methods
-  //  
-
-
+    std::vector<std::vector<int>> createTab(int sommets);
+    std::vector<std::vector<int>> get_tab();
+    int get_sommets();
   /**
    * Set the value of tab
    * @param new_var the new value of tab
