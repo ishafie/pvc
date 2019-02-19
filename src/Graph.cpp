@@ -320,8 +320,9 @@ void bruteforce_pvc_coords(list<pair<int, int>> lc) {
 
 void solve_glouton(Matrice m, list<pair<int, int>> lc, pair<int, int> start_coord, list<pair<int, int>> *ret) {
     cout << "size: " << lc.size() << endl;
-    if (lc.size() <= 0)
+    if (lc.size() <= 1)
         return ;
+	m=coord_vers_matrice(lc);
     map<int, pair<int, int>> from_index_to_coord = m.get_index_to_coord();
     map<pair<int, int>, int> from_coord_to_index = m.get_coord_to_index();
     vector<vector<int>> tab = m.get_matrice();
@@ -332,14 +333,19 @@ void solve_glouton(Matrice m, list<pair<int, int>> lc, pair<int, int> start_coor
     cout << "startindex: " << start_index << endl;
     cout << "min_distance: " << min_distance << endl;
     for (int i = 0; i < sommets; i++) {
-        if (start_index != i && tab[start_index][i] < min_distance) {
+        if (start_index != i && tab[start_index][i] <= min_distance) {
             min_distance = tab[start_index][i];
             min_coord = from_index_to_coord[i];
+			//cout << "tab[][]=" << tab[start_index][i] << endl;
         }
     }
-    cout << "min: (" << min_coord.first << ", " << min_coord.second << ") " << endl;
+
     lc.remove(start_coord);
     lc.remove(min_coord);
+	for (auto a : lc){
+		cout << a.first << " " << a.second << endl;
+	}
+
     cout << "size after delete: " << lc.size() << endl;
     ret->push_back(min_coord);
     return solve_glouton(m, lc, min_coord, ret);
@@ -358,6 +364,97 @@ void glouton_pvc(list<pair<int, int>> lc) {
         cout << "(" << a.first << ", " << a.second << ") ";
     });
     cout << endl;
+}
+
+
+void solve_glouton_for_opt(Matrice m, list<pair<int, int>> lc, pair<int, int> start_coord, vector<pair<int, int>> *ret) {
+    cout << "size: " << lc.size() << endl;
+    if (lc.size() == 1){
+		ret->push_back(lc.front());
+        return ;
+	}
+	if (lc.size() < 0){
+        return ;
+	}
+	m=coord_vers_matrice(lc);
+    map<int, pair<int, int>> from_index_to_coord = m.get_index_to_coord();
+    map<pair<int, int>, int> from_coord_to_index = m.get_coord_to_index();
+    vector<vector<int>> tab = m.get_matrice();
+    int sommets = m.get_sommets();
+    int start_index = from_coord_to_index[start_coord];
+    int min_distance = start_index == 0 ? tab[start_index][1] : tab[start_index][0];
+    pair<int, int> min_coord = start_index == 0 ? from_index_to_coord[1] : from_index_to_coord[0];
+    cout << "startindex: " << start_index << endl;
+    cout << "min_distance: " << min_distance << endl;
+    for (int i = 0; i < sommets; i++) {
+        if (start_index != i && tab[start_index][i] <= min_distance) {
+            min_distance = tab[start_index][i];
+            min_coord = from_index_to_coord[i];
+			//cout << "tab[][]=" << tab[start_index][i] << endl;
+        }
+    }
+
+    lc.remove(start_coord);
+    lc.remove(min_coord);
+	for (auto a : lc){
+		cout << a.first << " " << a.second << endl;
+	}
+
+    cout << "size after delete: " << lc.size() << endl;
+    ret->push_back(min_coord);
+    return solve_glouton_for_opt(m, lc, min_coord, ret);
+}
+
+
+
+
+auto solve_2_opt(vector<pair<int, int>> &ret){
+	bool better = true;
+	int s = ret.size() -1 ;
+	cout << " size -1 = " << s << endl;
+	while (better == true) {
+		better = false;
+		cout << " ----------  restart  ----------" << endl;
+		for (int i = 0; i < ret.size() -1; i ++){
+			for (int j = 0; j < ret.size() -1 ; j ++){
+				if ( j != i -1  && j != i && j != i+1){
+					//if (distance(ret->at(i), ret->at(i+1)) + distance(ret->at(j),ret->at(j+1)) > distance(ret->at(i),ret->at(j)) + distance(ret->at(i+1),ret->at(j+1))){
+					cout << "x=" << i << ", y=" << j << " ====>  " ;
+					cout << distance(ret[i], ret[i+1 % s]) + distance(ret[j],ret[j+1 % s]) << " - ";
+					cout << distance(ret[i],ret[j]) + distance(ret[i+1],ret[j+1]) << endl;
+					if (distance(ret[i], ret[i+1 % s]) + distance(ret[j],ret[j+1 % s]) > distance(ret[i],ret[j]) + distance(ret[i+1 % s],ret[j+1 % s])){
+						cout << "btter found !" << endl;
+						pair<int, int> tmp = ret[i+1%s];
+						ret[i+1%s] = ret[j+1%s];
+						ret[j+1%s]= tmp;
+						
+						better = true;
+					}
+				}
+			}
+		}
+	}
+	return ret;
+}
+
+
+void glouton_pvc_2_opt(list<pair<int, int>> lc) {
+    // opt-2 a partir glouton_pvc
+    // (0, 0) => 
+    Matrice m = coord_vers_matrice(lc);
+    vector<pair<int, int>> ret;
+    solve_glouton_for_opt(m, lc, *(lc.begin()), &ret);
+	cout << "Before 2-opt : " << endl;
+    for_each(ret.begin(), ret.end(), [](auto a){
+        cout << "(" << a.first << ", " << a.second << ") ";
+    });
+    cout << endl;
+	solve_2_opt(ret);
+	cout << "after : " << endl;
+	for_each(ret.begin(), ret.end(), [](auto a){
+        cout << "(" << a.first << ", " << a.second << ") ";
+    });
+
 }
 
 
@@ -433,6 +530,14 @@ void test_distances_boucle(Graph g2) {
 }
 
 
+void test_glouton_pvc_2_opt() {
+    list<pair<int, int>> lc = {make_pair(0, 0), make_pair(1, 1),
+        make_pair(2, 4), make_pair(1, -3), make_pair(0, -5), make_pair(0, 4),
+        make_pair(-1, 5), make_pair(-2, 3), make_pair(-3, 0)};
+    glouton_pvc_2_opt(lc);
+}
+
+
 int main(void){
     /*std::ofstream file ("../resources/test.txt");
     srand (time(NULL));
@@ -446,7 +551,9 @@ int main(void){
     cout << "created" << endl;
     g2.print();
     input.close();
-    test_glouton_pvc();
+	test_glouton_pvc_2_opt();
+
+    //test_glouton_pvc();
     // test_bruteforce_pvc_coords();
     // bruteforce_pvc(g2);
     // test_permutations();
