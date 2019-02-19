@@ -1,4 +1,5 @@
 #include "pvc.hpp"
+#include <climits>
 
 using namespace std;
 //faire classe abstraite resoudre
@@ -15,6 +16,7 @@ class Matrice {
     map<int, pair<int, int>> get_index_to_coord();
     void print();
     vector<vector<int>> get_matrice();
+    void remove_index(int a);
     int get_sommets();
 };
 
@@ -45,6 +47,14 @@ void Matrice::print() {
         }
         cout << endl;
     }
+}
+
+void Matrice::remove_index(int a) {
+    for (int i = 0; i < this->sommets; i++) {
+        this->tab[a][i] = -1;
+        this->tab[i][a] = -1;
+    }
+
 }
 
 class Graph {
@@ -327,31 +337,38 @@ void bruteforce_pvc_coords(list<pair<int, int>> lc) {
     
 }
 
-void solve_glouton(Matrice m, list<pair<int, int>> lc, pair<int, int> start_coord, list<pair<int, int>> *ret) {
+int solve_glouton(Matrice m, list<pair<int, int>> lc, pair<int, int> start_coord, vector<pair<int, int>> *ret) {
     cout << "size: " << lc.size() << endl;
     if (lc.size() <= 0)
-        return ;
+        return 0;
     map<int, pair<int, int>> from_index_to_coord = m.get_index_to_coord();
     map<pair<int, int>, int> from_coord_to_index = m.get_coord_to_index();
     vector<vector<int>> tab = m.get_matrice();
     int sommets = m.get_sommets();
     int start_index = from_coord_to_index[start_coord];
-    int min_distance = start_index == 0 ? tab[start_index][1] : tab[start_index][0];
+    int min_index = start_index == 0 ? 1 : 0;
+    int min_distance = INT_MAX;
     pair<int, int> min_coord = start_index == 0 ? from_index_to_coord[1] : from_index_to_coord[0];
-    cout << "startindex: " << start_index << endl;
-    cout << "min_distance: " << min_distance << endl;
     for (int i = 0; i < sommets; i++) {
-        if (start_index != i && tab[start_index][i] < min_distance) {
+        if (start_index != i && tab[start_index][i] != -1 && tab[start_index][i] < min_distance) {
+            cout << "i : " << i << endl;
+            min_index = 1;
             min_distance = tab[start_index][i];
             min_coord = from_index_to_coord[i];
         }
     }
+    cout << "min_distance: " << min_distance << endl;
+    cout << "startindex: " << start_index << endl;
+    cout << "minindex: " << min_index << endl;
     cout << "min: (" << min_coord.first << ", " << min_coord.second << ") " << endl;
+    cout << "removing index: " << start_index << ", " << min_index << endl;
+    m.remove_index(start_index);
     lc.remove(start_coord);
     lc.remove(min_coord);
     cout << "size after delete: " << lc.size() << endl;
     ret->push_back(min_coord);
-    return solve_glouton(m, lc, min_coord, ret);
+    
+    return min_distance + solve_glouton(m, lc, min_coord, ret);
 }
 
 void glouton_pvc(list<pair<int, int>> lc) {
@@ -361,12 +378,24 @@ void glouton_pvc(list<pair<int, int>> lc) {
     // a la fin on relie le dernier sommet au premier sommet.
     // (0, 0) => 
     Matrice m = coord_vers_matrice(lc);
-    list<pair<int, int>> ret;
-    solve_glouton(m, lc, *(lc.begin()), &ret);
+    map<int, pair<int, int>> from_index_to_coord = m.get_index_to_coord();
+    map<pair<int, int>, int> from_coord_to_index = m.get_coord_to_index();
+    vector<vector<int>> tab = m.get_matrice();
+
+    vector<pair<int, int>> ret;
+    ret.push_back(*(lc.begin()));
+    int distance = solve_glouton(m, lc, *(lc.begin()), &ret);
+    pair<int, int> end = *(--ret.end());
+    cout << "c: " << end.first << ", " << end.second << endl;
+    cout << tab[from_coord_to_index[end]][from_coord_to_index[*(lc.begin())]] << endl;
+    cout << from_coord_to_index[end] << endl;
+    distance += tab[from_coord_to_index[end]][from_coord_to_index[*(lc.begin())]];
+    cout << "distance: " << distance << endl;
     for_each(ret.begin(), ret.end(), [](auto a){
         cout << "(" << a.first << ", " << a.second << ") ";
     });
     cout << endl;
+    // (0, 0) (1, 1) (2, 4) (0, 4) (-1, 5) (-2, 3) (-3, 0) (1, -3) (0, -5)
 }
 
 
@@ -455,7 +484,7 @@ int main(void){
     g2.print();
     input.close();
     test_glouton_pvc();
-    // test_bruteforce_pvc_coords();
+    test_bruteforce_pvc_coords();
     // bruteforce_pvc(g2);
     // test_permutations();
     // test_meilleure_boucle(g2);
