@@ -425,25 +425,25 @@ vector<pair<int, int>> glouton_pvc(list<pair<int, int>> lc) {
 
 
 
-auto solve_2_opt(vector<pair<int, int>> &ret){
+auto solve_2_opt(vector<pair<int, int>> *ret){
 	bool better = true;
-	int s = ret.size() -1 ;
+	int s = ret->size() -1 ;
 	//cout << " size -1 = " << s << endl;
 	while (better == true) {
 		better = false;
 		//cout << " ----------  restart  ----------" << endl;
-		for (int i = 0; i < ret.size() -1; i ++){
-			for (int j = 0; j < ret.size() -1 ; j ++){
+		for (int i = 0; i < ret->size() -1; i ++){
+			for (int j = 0; j < ret->size() -1 ; j ++){
 				if ( j != i -1  && j != i && j != i+1){
 					//if (distance(ret->at(i), ret->at(i+1)) + distance(ret->at(j),ret->at(j+1)) > distance(ret->at(i),ret->at(j)) + distance(ret->at(i+1),ret->at(j+1))){
 					//cout << "x=" << i << ", y=" << j << " ====>  " ;
 					//cout << distance(ret[i], ret[i+1 % s]) + distance(ret[j],ret[j+1 % s]) << " - ";
 					//cout << distance(ret[i],ret[j]) + distance(ret[i+1],ret[j+1]) << endl;
-					if (distance(ret[i], ret[i+1 % s]) + distance(ret[j],ret[j+1 % s]) > distance(ret[i],ret[j]) + distance(ret[i+1 % s],ret[j+1 % s])){
+					if (distance((*ret)[i], (*ret)[i+1 % s]) + distance((*ret)[j],(*ret)[j+1 % s]) > distance((*ret)[i],(*ret)[j]) + distance((*ret)[i+1 % s],(*ret)[j+1 % s])){
 						//cout << "btter found !" << endl;
-						pair<int, int> tmp = ret[i+1%s];
-						ret[i+1%s] = ret[j+1%s];
-						ret[j+1%s]= tmp;
+						pair<int, int> tmp = (*ret)[i+1%s];
+						(*ret)[i+1%s] = (*ret)[j+1%s];
+						(*ret)[j+1%s]= tmp;
 						
 						better = true;
 					}
@@ -466,7 +466,7 @@ void glouton_pvc_2_opt(list<pair<int, int>> lc) {
         cout << "(" << a.first << ", " << a.second << ") ";
     });
     cout << endl;
-	solve_2_opt(ret);
+	solve_2_opt(&ret);
 	cout << "after : " << endl;
 	for_each(ret.begin(), ret.end(), [](auto a){
         cout << "(" << a.first << ", " << a.second << ") ";
