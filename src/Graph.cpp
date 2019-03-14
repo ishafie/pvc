@@ -455,7 +455,7 @@ auto solve_2_opt(vector<pair<int, int>> *ret){
 }
 
 
-void glouton_pvc_2_opt(list<pair<int, int>> lc) {
+vector<pair<int, int>> glouton_pvc_2_opt(list<pair<int, int>> lc) {
     // opt-2 a partir glouton_pvc
     // (0, 0) => 
     Matrice m = coord_vers_matrice(lc);
@@ -472,9 +472,96 @@ void glouton_pvc_2_opt(list<pair<int, int>> lc) {
         cout << "(" << a.first << ", " << a.second << ") ";
     });
     cout << endl;
+    return ret;
 
 }
 
+int distance_of_individual(const vector<pair<int, int>> individual) {
+    int distance_sum = 0;
+    int i = 0;
+    for (i = 0; (i + 1) < individual.size(); i++) {
+        distance_sum += distance(individual[i], individual[i + 1]);
+    }
+    distance_sum += distance(individual[i], individual[0]);
+    return distance_sum;
+}
+
+auto generate_population(vector<pair<int, int>> alpha_individual, int nb_individuals) {
+    vector<pair<int, int>> individual;
+    vector<pair<int, vector<pair<int, int>>>> population;
+    population.push_back(make_pair(distance_of_individual(alpha_individual), alpha_individual));
+    for (int i = 0; i < nb_individuals; i++) {
+        individual = alpha_individual;
+        random_shuffle(individual.begin(), individual.end());
+        population.push_back(make_pair(distance_of_individual(individual), individual));
+    }
+    return population;
+}
+
+void display_population(auto population) {
+    cout << "POPULATION:" << endl;
+    for_each(population.begin(), population.end(), [](auto individual){
+        cout << individual.first << ": ";
+        for_each(individual.second.begin(), individual.second.end(), [](auto a){ cout << "(" << a.first << ", " << a.second << ") "; });
+        cout << endl;
+    });
+}
+
+auto make_child(auto a, auto b) {
+    int nb_genes = a.second.size();
+    int doublon_remover = 0;
+    int k = rand() % nb_genes;
+    int k2 = rand() % nb_genes;
+    vector<pair<int, int>> genes;
+    for (int i = 0; i < k; i ++) {
+        genes.push_back(a.second[i]);
+    }
+    for (int i = k; i < nb_genes; i++) {
+        while (find(genes.begin(), genes.end(), b.second[(i + doublon_remover) % nb_genes]) != genes.end()) {
+            // cout << "DOUBLON: " << doublon_remover << " => " << b.second[i].first << ", " << b.second[i].second << endl;
+            doublon_remover++;
+        }
+        genes.push_back(b.second[(i + doublon_remover) % nb_genes]);
+        doublon_remover = 0;
+    }
+    k = rand() % nb_genes;
+    k = k == k2 ? (k + 1) % nb_genes : k;
+    iter_swap(genes.begin() + k, genes.begin() + k2); // mutation
+    return make_pair(distance_of_individual(genes), genes);
+}
+
+void reproduction(auto reproductors, int nb_individuals) {
+    vector<pair<int, vector<pair<int, int>>>> children;
+    for (int i = 0; i < nb_individuals; i++) {
+        int other_parent = rand() % nb_individuals;
+        other_parent = other_parent == i ? (other_parent + 1) % nb_individuals : other_parent;
+        cout << "child between " << i << " and " << other_parent << endl;
+        auto child = make_child(reproductors[i], reproductors[other_parent]);
+        children.push_back(child);
+    }
+    display_population(children);
+}
+
+void algo_genetique(list<pair<int, int>> lc, int nb_individuals, int max_reproductors) {
+    cout << "start genetique" << endl;
+    vector<pair<int, int>> alpha_individual = glouton_pvc_2_opt(lc);
+    vector<pair<int, vector<pair<int, int>>>> population = generate_population(alpha_individual, nb_individuals);
+    sort(population.begin(), population.end(), [](auto a, auto b){return a.first < b.first;});
+    vector<pair<int, vector<pair<int, int>>>> reproductors;
+    for (int i = 0; i < nb_individuals; i++) {
+        reproductors.push_back(make_pair(population[i % max_reproductors].first, population[i % max_reproductors].second));
+    }
+    reproduction(reproductors, nb_individuals);
+    // display_population(reproductors, nb_individuals);
+
+}
+
+void test_algo_genetique() {
+    list<pair<int, int>> lc = {make_pair(0, 0), make_pair(1, 1),
+        make_pair(2, 4), make_pair(1, -3), make_pair(0, -5), make_pair(0, 4),
+        make_pair(-1, 5), make_pair(-2, 3), make_pair(-3, 0)};
+    algo_genetique(lc, 10, 3);
+}
 
 
 void test_bruteforce_pvc_coords() {
@@ -555,23 +642,22 @@ void test_glouton_pvc_2_opt() {
     glouton_pvc_2_opt(lc);
 }
 
-
 int main(void){
-    /*std::ofstream file ("../resources/test.txt");
     srand (time(NULL));
+    /*std::ofstream file ("../resources/test.txt");
     Graph g(5);
     cout << "starting pvc" << endl;
     g.generateRandomGraph(file, 10);
     file.close();
     g.print();*/
-    std::ifstream input("../resources/complet.txt");
+    /*std::ifstream input("../resources/complet.txt");
     Graph g2(input);
     cout << "created" << endl;
     g2.print();
-    input.close();
-    test_bruteforce_pvc_coords();
-	test_glouton_pvc_2_opt();
-
+    input.close();*/
+    test_algo_genetique();
+    // test_bruteforce_pvc_coords();
+	// test_glouton_pvc_2_opt();
     // test_glouton_pvc();
     // bruteforce_pvc(g2);
     // test_permutations();
