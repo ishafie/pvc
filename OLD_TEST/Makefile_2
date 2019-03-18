@@ -1,0 +1,40 @@
+EXE = Main
+
+SRC_DIR = src
+OBJ_DIR = obj
+
+SRC = $(wildcard $(SRC_DIR)/*.cpp)
+OBJ = $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+
+CC=g++
+
+CPPFLAGS += -Iinclude
+CFLAGS += -Wall -std=c++14 -g
+LDFLAGS += -std=c++14 -g
+LDLIBS +=
+
+.PHONY: all clean
+
+all: $(EXE)
+
+Main: Main.o Glouton.o bruteforce.o Genetic.o Graph.o
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+Main.o: Main.cpp Graph.h Glouton.h Algo.h Genetic.h bruteforce.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $(SRC_DIR)/Main.cpp
+
+Graph.o: 
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $(SRC_DIR)/Graph.cpp
+	
+Genetic.o: 
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $(SRC_DIR)/Genetic.cpp
+
+bruteforce.o: 
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $(SRC_DIR)/bruteforce.cpp
+
+Glouton.o: 
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $(SRC_DIR)/Glouton.cpp
+
+	
+clean:
+	$(RM) $(OBJ_DIR) $(EXE)
