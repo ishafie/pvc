@@ -13,26 +13,15 @@ CFLAGS += -Wall -std=c++14 -g
 LDFLAGS += -std=c++14 -g
 LDLIBS +=
 
-all: Main
+.PHONY: all clean
 
-Main: Main.o Glouton.o bruteforce.o Genetic.o Graph.o
-	$(CC) $(LDFLAGS) $(LDLIBS) Main.o Glouton.o bruteforce.o Genetic.o Graph.o -o $@
+all: $(EXE)
 
-Main.o: $(SRC_DIR)/Main.cpp $(SRC_DIR)/Graph.h $(SRC_DIR)/Glouton.h $(SRC_DIR)/Algo.h $(SRC_DIR)/Genetic.h $(SRC_DIR)/bruteforce.h $(SRC_DIR)/pvc.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $(SRC_DIR)/Main.cpp
+$(EXE): $(OBJ)
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
-Graph.o: $(SRC_DIR)/Graph.cpp $(SRC_DIR)/Graph.h $(SRC_DIR)/pvc.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $(SRC_DIR)/Graph.cpp
-	
-Genetic.o:  $(SRC_DIR)/Genetic.cpp $(SRC_DIR)/Algo.h $(SRC_DIR)/Glouton.h $(SRC_DIR)/pvc.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $(SRC_DIR)/Genetic.cpp
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-bruteforce.o: $(SRC_DIR)/bruteforce.cpp $(SRC_DIR)/bruteforce.h $(SRC_DIR)/Algo.h $(SRC_DIR)/pvc.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $(SRC_DIR)/bruteforce.cpp
-
-Glouton.o: $(SRC_DIR)/Glouton.cpp $(SRC_DIR)/Glouton.h $(SRC_DIR)/Algo.h $(SRC_DIR)/pvc.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $(SRC_DIR)/Glouton.cpp
-
-	
 clean:
 	$(RM) $(OBJ_DIR) $(EXE)

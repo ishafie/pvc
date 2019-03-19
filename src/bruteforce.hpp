@@ -2,9 +2,9 @@
 #ifndef BRUTEFORCE_H
 #define BRUTEFORCE_H
 
-#include "pvc.h"
-#include "Algo.h"
-#include "Graph.h"
+#include "pvc.hpp"
+#include "Algo.hpp"
+#include "Graph.hpp"
 
 class BruteForce : public Algo
 {
@@ -13,7 +13,7 @@ public:
     {
             
     }
-    static list<list<int>> generate_permutations(int n) ;
+
     static list<list<int>> generate_one_permutations(int n, int depart) ;
 
     static list<int> distances_boucles(list<list<int>> lb, vector<vector<int>> tab) ;

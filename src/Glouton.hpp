@@ -1,10 +1,10 @@
 #ifndef GLOUTON_H
 #define GLOUTON_H
 
-#include "pvc.h"
+#include "pvc.hpp"
 #include <climits>
-#include "Algo.h"
-#include "Graph.h"
+#include "Algo.hpp"
+#include "Graph.hpp"
 
 
 class Glouton : public Algo{

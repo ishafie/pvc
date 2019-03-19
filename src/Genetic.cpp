@@ -1,30 +1,21 @@
-#include "pvc.h"
-#include "Algo.h"
-#include "Glouton.h"
+#include "Genetic.hpp"
+#include "pvc.hpp"
+#include "Algo.hpp"
+#include "Glouton.hpp"
 
-class Genetic : public Algo
-{
-public:
-    virtual void resoleAlgo()
-    {
-            
-    }
 
-int distance(pair<int, int> a, pair<int, int> b) {
-    return sqrt(((b.first - a.first) * (b.first - a.first)) + ((b.second - a.second) * (b.second - a.second)));
-}
 
-int distance_of_individual(const vector<pair<int, int>> individual) {
+int Genetic::distance_of_individual(const vector<pair<int, int>> individual) {
     int distance_sum = 0;
     int i = 0;
     for (i = 0; (i + 1) < individual.size(); i++) {
-        distance_sum += distance(individual[i], individual[i + 1]);
+        distance_sum += Graph::distance(individual[i], individual[i + 1]);
     }
-    distance_sum += distance(individual[i], individual[0]);
+    distance_sum += Graph::distance(individual[i], individual[0]);
     return distance_sum;
 }
 
-auto generate_population(vector<pair<int, int>> alpha_individual, int nb_individuals) {
+auto Genetic::generate_population(vector<pair<int, int>> alpha_individual, int nb_individuals) {
     vector<pair<int, int>> individual;
     vector<pair<int, vector<pair<int, int>>>> population;
     population.push_back(make_pair(distance_of_individual(alpha_individual), alpha_individual));
@@ -36,7 +27,7 @@ auto generate_population(vector<pair<int, int>> alpha_individual, int nb_individ
     return population;
 }
 
-void display_population(vector<pair<int, vector<pair<int, int>>>> population) {
+void Genetic::display_population(vector<pair<int, vector<pair<int, int>>>> population) {
     cout << "POPULATION:" << endl;
     for_each(population.begin(), population.end(), [](auto individual){
         cout << individual.first << ": ";
@@ -45,7 +36,7 @@ void display_population(vector<pair<int, vector<pair<int, int>>>> population) {
     });
 }
 
-auto make_child(auto a, auto b) {
+auto Genetic::make_child(pair<int, vector<pair<int, int>>> a, pair<int, vector<pair<int, int>>> b) {
     int nb_genes = a.second.size();
     int doublon_remover = 0;
     int k = rand() % nb_genes;
@@ -68,30 +59,29 @@ auto make_child(auto a, auto b) {
     return make_pair(distance_of_individual(genes), genes);
 }
 
-void reproduction(auto reproductors, int nb_individuals) {
+void Genetic::reproduction(vector<pair<int, vector<pair<int, int>>>> reproductors, int nb_individuals) {
     vector<pair<int, vector<pair<int, int>>>> children;
     for (int i = 0; i < nb_individuals; i++) {
         int other_parent = rand() % nb_individuals;
         other_parent = other_parent == i ? (other_parent + 1) % nb_individuals : other_parent;
         cout << "child between " << i << " and " << other_parent << endl;
-        auto child = make_child(reproductors[i], reproductors[other_parent]);
+        auto child = Genetic::make_child(reproductors[i], reproductors[other_parent]);
         children.push_back(child);
     }
-    display_population(children);
+    Genetic::display_population(children);
 }
 
-void algo_genetique(list<pair<int, int>> lc, int nb_individuals, int max_reproductors) {
+void Genetic::algo_genetique(list<pair<int, int>> lc, int nb_individuals, int max_reproductors) {
     cout << "start genetique" << endl;
     vector<pair<int, int>> alpha_individual = Glouton::glouton_pvc_2_opt(lc);
-    vector<pair<int, vector<pair<int, int>>>> population = generate_population(alpha_individual, nb_individuals);
+    vector<pair<int, vector<pair<int, int>>>> population = Genetic::generate_population(alpha_individual, nb_individuals);
     sort(population.begin(), population.end(), [](auto a, auto b){return a.first < b.first;});
     vector<pair<int, vector<pair<int, int>>>> reproductors;
     for (int i = 0; i < nb_individuals; i++) {
         reproductors.push_back(make_pair(population[i % max_reproductors].first, population[i % max_reproductors].second));
     }
-    reproduction(reproductors, nb_individuals);
+    Genetic::reproduction(reproductors, nb_individuals);
     // display_population(reproductors, nb_individuals);
 
 }
 
-};

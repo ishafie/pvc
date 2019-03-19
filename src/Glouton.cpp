@@ -1,10 +1,7 @@
-#include "Glouton.h"
+#include "Glouton.hpp"
 
-int distance(pair<int, int> a, pair<int, int> b) {
-    return sqrt(((b.first - a.first) * (b.first - a.first)) + ((b.second - a.second) * (b.second - a.second)));
-}
 
-int solve_glouton(Graph::Matrice m, list<pair<int, int>> lc, pair<int, int> start_coord, vector<pair<int, int>> *ret) {
+int Glouton::solve_glouton(Graph::Matrice m, list<pair<int, int>> lc, pair<int, int> start_coord, vector<pair<int, int>> *ret) {
     if (lc.size() <= 0)
         return 0;
     map<int, pair<int, int>> from_index_to_coord = m.get_index_to_coord();
@@ -36,7 +33,7 @@ int solve_glouton(Graph::Matrice m, list<pair<int, int>> lc, pair<int, int> star
     return min_distance + solve_glouton(m, lc, min_coord, ret);
 }
 
-vector<pair<int, int>> glouton_pvc(list<pair<int, int>> lc) {
+vector<pair<int, int>> Glouton::glouton_pvc(list<pair<int, int>> lc) {
     // construire pas à pas
     // partir d'un sommet quelconque et itérer, à chaque itération
     // on relie le dernier sommet atteint au sommet le plus proche en excluant les sommets deja parcourus
@@ -103,7 +100,7 @@ vector<pair<int, int>> glouton_pvc(list<pair<int, int>> lc) {
 
 
 
-auto solve_2_opt(vector<pair<int, int>> *ret){
+auto Glouton::solve_2_opt(vector<pair<int, int>> *ret){
 	bool better = true;
 	int s = ret->size();
 	//cout << " size -1 = " << s << endl;
@@ -117,7 +114,7 @@ auto solve_2_opt(vector<pair<int, int>> *ret){
 					//cout << "x=" << i << ", y=" << j << " ====>  " ;
 					//cout << distance((*ret)[i], (*ret)[i+1 % s]) + distance((*ret)[j],(*ret)[j+1 % s]) << " - ";
 					//cout << distance((*ret)[i], (*ret)[j]) + distance((*ret)[i+1],(*ret)[j+1]) << endl;
-					if (distance((*ret)[i], (*ret)[i+1 % s]) + distance((*ret)[j],(*ret)[j+1 % s]) > distance((*ret)[i],(*ret)[j]) + distance((*ret)[i+1 % s],(*ret)[j+1 % s])){
+					if (Graph::distance((*ret)[i], (*ret)[i+1 % s]) + Graph::distance((*ret)[j],(*ret)[j+1 % s]) > Graph::distance((*ret)[i],(*ret)[j]) + Graph::distance((*ret)[i+1 % s],(*ret)[j+1 % s])){
 						//cout << "btter found !" << endl;
 						pair<int, int> tmp = (*ret)[i+1%s];
 						(*ret)[i+1%s] = (*ret)[j%s];
@@ -133,7 +130,7 @@ auto solve_2_opt(vector<pair<int, int>> *ret){
 }
 
 
-vector<pair<int, int>> glouton_pvc_2_opt(list<pair<int, int>> lc) {
+vector<pair<int, int>> Glouton::glouton_pvc_2_opt(list<pair<int, int>> lc) {
     // opt-2 a partir glouton_pvc
     // (0, 0) => 
     

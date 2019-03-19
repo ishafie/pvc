@@ -1,19 +1,11 @@
 
 
-#include "bruteforce.h"
-
-static list<list<int>> generate_permutations(int n) {
-    list<list<int>> ret;
-    vector<int> tab(n);
-    for (int i = 0; i < n; i++) {
-        tab[i] = i;
-    }
-    Graph::permute(&ret, tab, 0, n - 1);
-    return ret;
-}
+#include "bruteforce.hpp"
 
 
-static list<list<int>> generate_one_permutations(int n, int depart) {
+
+
+list<list<int>> BruteForce::generate_one_permutations(int n, int depart) {
     list<list<int>> ret;
     vector<int> tab(n);
     for (int i = 0; i < n; i++) {
@@ -25,7 +17,7 @@ static list<list<int>> generate_one_permutations(int n, int depart) {
     return ret;
 }
 
-list<int> distances_boucles(list<list<int>> lb, vector<vector<int>> tab) {
+list<int>  BruteForce::distances_boucles(list<list<int>> lb, vector<vector<int>> tab) {
     list<int> ret;
     for_each(lb.begin(), lb.end(), [&ret, tab](list<int> boucle){
         int distance = 0;
@@ -41,13 +33,13 @@ list<int> distances_boucles(list<list<int>> lb, vector<vector<int>> tab) {
     return ret;
 }
 
-list<list<int>> genere_boucle(int n, int depart) {
+list<list<int>> BruteForce::genere_boucle(int n, int depart) {
     return generate_one_permutations(n, depart);
 }
 
-static pair<int, list<int>> meilleure_boucle(list<list<int>> lb, vector<vector<int>> tab) {
+pair<int, list<int>> BruteForce::meilleure_boucle(list<list<int>> lb, vector<vector<int>> tab) {
     pair<int, list<int>> ret;
-    list<int> l = distances_boucles(lb, tab);
+    list<int> l =  BruteForce::distances_boucles(lb, tab);
     list<list<int>>::iterator it = lb.begin();
     auto min_it = min_element(l.begin(), l.end());
     int min_index = distance(l.begin(), min_it);
@@ -60,7 +52,7 @@ static pair<int, list<int>> meilleure_boucle(list<list<int>> lb, vector<vector<i
     return make_pair(-1, l);
 }
 
-void bruteforce_pvc(Graph g2) {
+void BruteForce::bruteforce_pvc(Graph g2) {
     vector<vector<int>> tab = g2.get_tab();
     list<list<int>> lb = generate_one_permutations(g2.get_sommets(), 0);
     pair<int, list<int>> m_b = meilleure_boucle(lb, tab);
@@ -75,7 +67,7 @@ void bruteforce_pvc(Graph g2) {
     cout << endl;
 }
 
-void bruteforce_pvc_coords(list<pair<int, int>> lc) {
+void BruteForce::bruteforce_pvc_coords(list<pair<int, int>> lc) {
     Graph::Matrice m = Graph::Matrice::coord_vers_matrice(lc);
     map<int, pair<int, int>> from_index_to_coord = m.get_index_to_coord();
     vector<vector<int>> tab = m.get_matrice();

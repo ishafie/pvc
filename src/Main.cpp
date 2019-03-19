@@ -1,9 +1,9 @@
-#include "Graph.h"
-#include "Algo.h"
-#include "Glouton.h"
-#include "Genetic.h"
-#include "bruteforce.h"
-#include "pvc.h"
+#include "Graph.hpp"
+#include "Algo.hpp"
+#include "Glouton.hpp"
+#include "Genetic.hpp"
+#include "bruteforce.hpp"
+#include "pvc.hpp"
 
 using namespace std;
 
@@ -39,7 +39,7 @@ void test_coord_vers_matrice() {
 
 void test_meilleure_boucle(Graph g2) {
     vector<vector<int>> tab = g2.get_tab();
-    list<list<int>> lb = BruteForce::generate_permutations(g2.get_sommets());
+    list<list<int>> lb = Graph::generate_permutations(g2.get_sommets());
     pair<int, list<int>> m_b = BruteForce::meilleure_boucle(lb, tab);
     if (m_b.first == -1) {
         cout << "Echec de la fonction meilleure_boucle." << endl;
@@ -53,7 +53,7 @@ void test_meilleure_boucle(Graph g2) {
 }
 
 void test_permutations() {
-    list<list<int>> tmp = BruteForce::generate_permutations(4);
+    list<list<int>> tmp = Graph::generate_permutations(4);
     for_each(tmp.begin(), tmp.end(), [](list<int> l){
         for_each(l.begin(), l.end(), [](int a){cout << a << " ";});
         cout << endl;
@@ -70,7 +70,7 @@ void test_one_permutation() {
 
 void test_distances_boucle(Graph g2) {
     vector<vector<int>> tab = g2.get_tab();
-    list<list<int>> lb = BruteForce::generate_permutations(4);
+    list<list<int>> lb = Graph::generate_permutations(4);
     list<int> l = BruteForce::distances_boucles(lb, tab);
     cout << "distances: " << endl;
     list<list<int>>::iterator it = lb.begin();

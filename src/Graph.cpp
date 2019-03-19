@@ -1,14 +1,19 @@
-#include "pvc.h"
+#include "pvc.hpp"
 #include <climits>
 
-#include "Algo.h"
-#include "Graph.h"
-#include "Glouton.h"
+#include "Algo.hpp"
+#include "Graph.hpp"
+#include "Glouton.hpp"
 
 using namespace std;
 //faire classe abstraite resoudre
 
-static list<list<int>> generate_permutations(int n) {
+int Graph::distance(pair<int, int> a, pair<int, int> b) {
+    return sqrt(((b.first - a.first) * (b.first - a.first)) + ((b.second - a.second) * (b.second - a.second)));
+}
+
+
+list<list<int>> Graph::generate_permutations(int n) {
     list<list<int>> ret;
     vector<int> tab(n);
     for (int i = 0; i < n; i++) {
@@ -16,6 +21,59 @@ static list<list<int>> generate_permutations(int n) {
     }
     Graph::permute(&ret, tab, 0, n - 1);
     return ret;
+}
+
+void Graph::permute(list<list<int>> *ret, vector<int> tab, int l, int n) 
+{ 
+    int i; 
+    if (l == n) {
+        list<int> tmp;
+        for (int index = 0; index <= n; index++) {
+            tmp.push_back(tab[index]);
+        }
+        ret->push_back(tmp);
+    }
+     
+    else
+    { 
+        for (i = l; i <= n; i++) 
+        {
+            iter_swap(tab.begin() + l, tab.begin() + i);
+            permute(ret, tab, l + 1, n); 
+            iter_swap(tab.begin() + l, tab.begin() + i);
+        }
+    } 
+} 
+
+
+Graph::Matrice Graph::Matrice::coord_vers_matrice(list<pair<int, int>> lc) {
+    map<pair<int, int>, int> from_coord_to_index;
+    map<int, pair<int, int>> from_index_to_coord;
+    int i = 0;
+    int x = 0;
+    int y = 0;
+    int d = 0;
+
+    for_each(lc.begin(), lc.end(), [&from_index_to_coord, &from_coord_to_index, &i](auto coord){
+        if (from_coord_to_index.find(coord) == from_coord_to_index.end()) {
+            from_coord_to_index[coord] = i;
+            from_index_to_coord[i] = coord;
+            i++;
+        }
+    });
+    vector<vector<int>> tab(i + 1, vector<int>(i + 1, 0));
+    list<pair<int, int>>::iterator it = lc.begin();
+    for (it; it != lc.end(); it++) {
+        for (list<pair<int, int>>::iterator it2 = lc.begin(); it2 != lc.end(); it2++) {
+            d = Graph::distance(*it, *it2);
+            // cout << "(" << it->first << ", " << it->second << ") => ";
+            // cout << "(" << it2->first << ", " << it2->second << ") => " << "[" << from_coord_to_index[*it] << "][" << from_coord_to_index[*it2] << "] : " << d << endl;
+            x = from_coord_to_index[*it];
+            y = from_coord_to_index[*it2];
+            tab[x][y] = d;
+        }
+    }
+    return Matrice(from_coord_to_index, from_index_to_coord, tab, i);
 }
 
 

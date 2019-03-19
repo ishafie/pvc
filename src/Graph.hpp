@@ -1,7 +1,7 @@
-#include "pvc.h"
+
 #ifndef GRAPH_H
 #define GRAPH_H
-
+#include "pvc.hpp"
 #include <string>
 #include <vector>
 
@@ -68,39 +68,37 @@ public:
     std::vector<std::vector<int>> createTab(int sommets);
     std::vector<std::vector<int>> get_tab();
     int get_sommets();
+    static int distance(pair<int, int> a, pair<int, int> b);
     static void permute(list<list<int>> *ret, vector<int> tab, int l, int n);
+    static list<list<int>> generate_permutations(int n) ;
 
 
 //faire classe abstraite resoudre
-class Matrice {
-    private:
-    map<pair<int, int>, int> from_coord_to_index;
-    map<int, pair<int, int>> from_index_to_coord;
-    vector<vector<int>> tab;
-    int sommets;
+    class Matrice {
+        private:
+        map<pair<int, int>, int> from_coord_to_index;
+        map<int, pair<int, int>> from_index_to_coord;
+        vector<vector<int>> tab;
+        int sommets;
 
-    public:
-    Matrice(map<pair<int, int>, int> fcti, map<int, pair<int, int>> fitc, vector<vector<int>> tab, int sommets): 
-      from_coord_to_index{fcti}, from_index_to_coord{fitc}, tab{tab}, sommets{sommets} {
-    }
-    void print();
-    vector<vector<int>> get_matrice();
-    void remove_index(int a);
-    int get_sommets();
+        public:
+        Matrice(map<pair<int, int>, int> fcti, map<int, pair<int, int>> fitc, vector<vector<int>> tab, int sommets): 
+          from_coord_to_index{fcti}, from_index_to_coord{fitc}, tab{tab}, sommets{sommets} {
+        }
+        void print();
+        vector<vector<int>> get_matrice();
+        void remove_index(int a);
+        int get_sommets();
+        map<pair<int, int>, int> get_coord_to_index();
+        map<int, pair<int, int>> get_index_to_coord();
 
+        int distance(pair<int, int> a, pair<int, int> b) {
+          return sqrt(((b.first - a.first) * (b.first - a.first)) + ((b.second - a.second) * (b.second - a.second)));
+        }
 
-
-    map<pair<int, int>, int> get_coord_to_index();
-
-    map<int, pair<int, int>> get_index_to_coord();
-
-    int distance(pair<int, int> a, pair<int, int> b) {
-      return sqrt(((b.first - a.first) * (b.first - a.first)) + ((b.second - a.second) * (b.second - a.second)));
-    }
-
-    static Matrice coord_vers_matrice(list<pair<int, int>> lc);
-    
-};
+        static Matrice coord_vers_matrice(list<pair<int, int>> lc);
+        
+    };
 
 
 
