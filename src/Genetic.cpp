@@ -85,3 +85,4 @@ void Genetic::algo_genetique(list<pair<int, int>> lc, int nb_individuals, int ma
 
 }
 
+

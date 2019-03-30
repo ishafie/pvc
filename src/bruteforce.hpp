@@ -9,11 +9,11 @@
 class BruteForce : public Algo
 {
 public:
-    virtual void resoleAlgo()
-    {
-            
-    }
 
+    virtual void operator() (list<pair<int, int>> lc){
+        return bruteforce_pvc_coords(lc);
+    }
+    
     static list<list<int>> generate_one_permutations(int n, int depart) ;
 
     static list<int> distances_boucles(list<list<int>> lb, vector<vector<int>> tab) ;

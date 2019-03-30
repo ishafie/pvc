@@ -59,46 +59,6 @@ vector<pair<int, int>> Glouton::glouton_pvc(list<pair<int, int>> lc) {
 }
 
 
-/*void solve_glouton_for_opt(Matrice m, list<pair<int, int>> lc, pair<int, int> start_coord, vector<pair<int, int>> *ret) {
-    cout << "size: " << lc.size() << endl;
-    if (lc.size() == 1){
-		ret->push_back(lc.front());
-        return ;
-	}
-	if (lc.size() < 0){
-        return ;
-	}
-	m=coord_vers_matrice(lc);
-    map<int, pair<int, int>> from_index_to_coord = m.get_index_to_coord();
-    map<pair<int, int>, int> from_coord_to_index = m.get_coord_to_index();
-    vector<vector<int>> tab = m.get_matrice();
-    int sommets = m.get_sommets();
-    int start_index = from_coord_to_index[start_coord];
-    int min_distance = start_index == 0 ? tab[start_index][1] : tab[start_index][0];
-    pair<int, int> min_coord = start_index == 0 ? from_index_to_coord[1] : from_index_to_coord[0];
-    cout << "startindex: " << start_index << endl;
-    cout << "min_distance: " << min_distance << endl;
-    for (int i = 0; i < sommets; i++) {
-        if (start_index != i && tab[start_index][i] <= min_distance) {
-            min_distance = tab[start_index][i];
-            min_coord = from_index_to_coord[i];
-			//cout << "tab[][]=" << tab[start_index][i] << endl;
-        }
-    }
-
-    lc.remove(start_coord);
-    lc.remove(min_coord);
-	for (auto a : lc){
-		cout << a.first << " " << a.second << endl;
-	}
-
-    cout << "size after delete: " << lc.size() << endl;
-    ret->push_back(min_coord);
-    return solve_glouton_for_opt(m, lc, min_coord, ret);
-}*/
-
-
-
 
 auto Glouton::solve_2_opt(vector<pair<int, int>> *ret){
 	bool better = true;
@@ -151,6 +111,11 @@ vector<pair<int, int>> Glouton::glouton_pvc_2_opt(list<pair<int, int>> lc) {
     return ret;
 
 };
+
+void Glouton::glouton_pvc_with_opt(list<pair<int, int>> lc){
+    Glouton::glouton_pvc_2_opt(lc);
+    return;
+}
 
 
 

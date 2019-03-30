@@ -19,10 +19,8 @@ class Algo
 {
 public:
 
-  Algo ();
-  virtual ~Algo ();
-  virtual void resolveAlgo(); 
-
+  Algo () {};
+  virtual void operator() (list<pair<int, int>> lc) = 0; 
 
 };
 
