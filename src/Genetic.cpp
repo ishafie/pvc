@@ -36,6 +36,13 @@ void Genetic::display_population(vector<pair<int, vector<pair<int, int>>>> popul
     });
 }
 
+void Genetic::display_individual(pair<int, vector<pair<int, int>>> individual) {
+    cout << "INDIVIDUAL:" << endl;
+    cout << individual.first << ": ";
+    for_each(individual.second.begin(), individual.second.end(), [](auto a){ cout << "(" << a.first << ", " << a.second << ") "; });
+    cout << endl;
+}
+
 auto Genetic::make_child(pair<int, vector<pair<int, int>>> a, pair<int, vector<pair<int, int>>> b) {
     int nb_genes = a.second.size();
     int doublon_remover = 0;
@@ -59,30 +66,44 @@ auto Genetic::make_child(pair<int, vector<pair<int, int>>> a, pair<int, vector<p
     return make_pair(distance_of_individual(genes), genes);
 }
 
-void Genetic::reproduction(vector<pair<int, vector<pair<int, int>>>> reproductors, int nb_individuals) {
+vector<pair<int, vector<pair<int, int>>>> Genetic::reproduction(vector<pair<int, vector<pair<int, int>>>> reproductors, int nb_individuals) {
     vector<pair<int, vector<pair<int, int>>>> children;
     for (int i = 0; i < nb_individuals; i++) {
         int other_parent = rand() % nb_individuals;
         other_parent = other_parent == i ? (other_parent + 1) % nb_individuals : other_parent;
-        cout << "child between " << i << " and " << other_parent << endl;
+        //cout << "child between " << i << " and " << other_parent << endl;
         auto child = Genetic::make_child(reproductors[i], reproductors[other_parent]);
         children.push_back(child);
     }
-    Genetic::display_population(children);
+    sort(children.begin(), children.end(), [](auto a, auto b){return a.first < b.first;});    
+    return children;
 }
 
-void Genetic::algo_genetique(list<pair<int, int>> lc, int nb_individuals, int max_reproductors) {
+void Genetic::algo_genetique(list<pair<int, int>> lc, int nb_individuals, int max_reproductors, int nb_iter) {
     cout << "start genetique" << endl;
-    vector<pair<int, int>> alpha_individual = Glouton::glouton_pvc_2_opt(lc);
+    vector<pair<int, int>> alpha_individual = Glouton::glouton_pvc(lc);
     vector<pair<int, vector<pair<int, int>>>> population = Genetic::generate_population(alpha_individual, nb_individuals);
-    sort(population.begin(), population.end(), [](auto a, auto b){return a.first < b.first;});
-    vector<pair<int, vector<pair<int, int>>>> reproductors;
-    for (int i = 0; i < nb_individuals; i++) {
-        reproductors.push_back(make_pair(population[i % max_reproductors].first, population[i % max_reproductors].second));
+    int index_iter = 0;
+    while (index_iter < nb_iter) {
+        sort(population.begin(), population.end(), [](auto a, auto b){return a.first < b.first;});
+        vector<pair<int, vector<pair<int, int>>>> reproductors;
+        for (int i = 0; i < nb_individuals; i++) {
+            reproductors.push_back(make_pair(population[i % max_reproductors].first, population[i % max_reproductors].second));
+        }
+        //display_population(reproductors);    
+        vector<pair<int, vector<pair<int, int>>>> children = Genetic::reproduction(reproductors, nb_individuals);
+        sort(reproductors.begin(), reproductors.end(), [](auto a, auto b){return a.first < b.first;});
+        population.clear();
+        for (int i = 0; i < max_reproductors; i++) {
+            population.push_back(reproductors[i]);
+        }
+        for (int i = max_reproductors; i < nb_individuals; i++) {
+            population.push_back(children[i - max_reproductors]);
+        }
+        index_iter++;
     }
-    Genetic::reproduction(reproductors, nb_individuals);
-    // display_population(reproductors, nb_individuals);
-
+    sort(population.begin(), population.end(), [](auto a, auto b){return a.first < b.first;});
+    display_individual(population[0]);
 }
 
 

@@ -11,7 +11,7 @@ void test_algo_genetique() {
     list<pair<int, int>> lc = {make_pair(0, 0), make_pair(1, 1),
         make_pair(2, 4), make_pair(1, -3), make_pair(0, -5), make_pair(0, 4),
         make_pair(-1, 5), make_pair(-2, 3), make_pair(-3, 0)};
-    Genetic::algo_genetique(lc, 10, 3);
+    Genetic::algo_genetique(lc, 10, 3, 10);
 }
 
 
@@ -110,9 +110,9 @@ int main(void){
     Algo* genetic = new Genetic();
     Algo* glouton = new Glouton();
 
-    solve(lc, bruteforce);
+    //solve(lc, bruteforce);
     solve(lc, genetic);
-    solve(lc, glouton);
+    //solve(lc, glouton);
 
     
     /*std::ofstream file ("../resources/test.txt");

@@ -12,7 +12,7 @@ public:
     Genetic(){};
 
     virtual void operator() (list<pair<int, int>> lc){
-        return algo_genetique(lc, 10, 3);
+        return algo_genetique(lc, 10, 3, 10);
     }
     
 
@@ -27,11 +27,12 @@ public:
     static auto make_child(pair<int, vector<pair<int, int>>> a, pair<int, vector<pair<int, int>>> b) ;
 
 
-    static void reproduction(vector<pair<int, vector<pair<int, int>>>> reproductors, int nb_individuals) ;
+    static vector<pair<int, vector<pair<int, int>>>>  reproduction(vector<pair<int, vector<pair<int, int>>>> reproductors, int nb_individuals) ;
 
 
-    static void algo_genetique(list<pair<int, int>> lc, int nb_individuals, int max_reproductors) ;
-
+    static void algo_genetique(list<pair<int, int>> lc, int nb_individuals, int max_reproductors, int nb_iter) ;
+    
+    static void display_individual(pair<int, vector<pair<int, int>>> individual);
 
 
 };
